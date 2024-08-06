@@ -108,6 +108,8 @@ recipie retrieveRecipie(recipiesMap book, String name);
 //COURIER
 int setupCourier(Courier *c);
 
+int updateInventory();
+
 
 
 
@@ -128,6 +130,9 @@ int main(){
     
             ch = setupCourier(courierPointer);
             printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
+        }
+        else{
+
         }
 
 
