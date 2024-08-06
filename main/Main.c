@@ -4,13 +4,6 @@
 #define HASHMAPSIZE 512
 #define STRINGSIZE 256
 
-//METHOD DECLARATION
-int addRecipie();
-int removeRecipie();
-int resupply();
-int order();
-int loadCurrier();
-
 
 
 
@@ -30,80 +23,91 @@ enum Command {
 
 
 //STRUCTURES
-typedef struct numberedItem{
+struct numberedItem{
     String  name;
     int     amount;
-}numberedItem;
+};
 
 
-typedef struct numberedItemList{
-    numberedItem             el;
+struct numberedItemList{
+    struct numberedItem     el;
     struct numberedItemList *next;
-}numberedItemList;
+};
 
 
-typedef struct namedNumberedItemList{
-    String              name;
-    numberedItemList    head;
-}namedNumberedItemList;
+struct namedNumberedItemList{
+    String                      name;
+    struct numberedItemList     head;
+};
 
 
-typedef struct namedNumberedItemListList{
-    namedNumberedItemList               el;
+struct namedNumberedItemListList{
+    struct namedNumberedItemList        el;
     struct namedNumberedItemListList    *next;
-}namedNumberedItemListList;
+};
 
 
-typedef struct namedNumberedItemListListMap{
-    namedNumberedItemList   hashArray[HASHMAPSIZE];
-}namedNumberedItemListListMap;
+struct namedNumberedItemListListMap{
+    struct namedNumberedItemList   hashArray[HASHMAPSIZE];
+};
 
 
-typedef struct numberedTimedItem{
+struct numberedTimedItem{
     String  name;
     int     amount;
     int     time;
-}numberedTimedItem;
+};
 
 
-typedef struct numberedTimedItemList{
-    numberedTimedItem                el;
+struct numberedTimedItemList{
+    struct numberedTimedItem        el;
     struct numberedTimedItemList    *next;
-}numberedTimedItemList;
+};
 
-
-
-typedef numberedItem                    ingredient;
-typedef numberedItemList                ingredientList;
-typedef namedNumberedItemList           recipie;
-typedef namedNumberedItemListList       recipiesList;
-typedef namedNumberedItemListListMap    recipiesMap;
-
-typedef numberedTimedItem               orderedItem;
-typedef numberedTimedItemList           orderedItemList;
-typedef numberedTimedItem               ingredientLot;
-typedef numberedTimedItemList           ingredientLotList;
+struct Courier{
+    int                             frequency;
+    int                             capacity;
+    struct numberedTimedItemList    ordersHead;
+};
 
 
 
 
 
+//TYPEDEFS
+typedef struct numberedItem                     ingredient;
+typedef struct numberedItemList                 ingredientList;
+typedef struct namedNumberedItemList            recipie;
+typedef struct namedNumberedItemListList        recipiesList;
+typedef struct namedNumberedItemListListMap     recipiesMap;
+
+typedef struct numberedTimedItem                orderedItem;
+typedef struct numberedTimedItemList            orderedItemList;
+typedef struct numberedTimedItem                ingredientLot;
+typedef struct numberedTimedItemList            ingredientLotList;
+
+typedef struct Courier                          Courier;
+
+
+
+
+
+//METHOD DECLARATION
+//INSTRUCTIONS
+int addRecipie();
+int removeRecipie();
+int resupply();
+int order();
+int loadCurrier();
+
+//RECIPIES
 void insertRecipie(recipiesMap book, recipie recipie);
 void deleteRecipie(recipiesMap book, String name);
 recipie retrieveRecipie(recipiesMap book, String name);
 
-
-
-
-
-//
-typedef struct Courier{
-    int             frequency;
-    int             capacity;
-    orderedItemList head;
-} Courier;
-
+//COURIER
 void setupCourier(Courier *c);
+
 
 
 
@@ -114,7 +118,7 @@ int main(){
     
     setupCourier(courierPointer);
 
-    printf("Frequency: %d\nCapacity: %d", courier.frequency, courier.capacity);
+    printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
 
     while(1 > 2){
         //Primo check da fare su camioncino
