@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HASHMAPSIZE 1024
 #define STRINGSIZE 256
@@ -48,7 +49,7 @@ struct namedNumberedItemListList{
 
 
 struct namedNumberedItemListListMap{
-    struct namedNumberedItemList   hashArray[HASHMAPSIZE];
+    struct namedNumberedItemListList   *hashArray[HASHMAPSIZE];
 };
 
 
@@ -94,8 +95,8 @@ typedef struct Courier                          Courier;
 
 //METHOD DECLARATION
 //INSTRUCTIONS
-int addRecipie();
-int removeRecipie();
+int addRecipie(recipiesMap book);
+int removeRecipie(recipiesMap book);
 int resupply();
 int order();
 int loadCurrier();
@@ -118,11 +119,20 @@ int updateInventory();
 int main(){
     int ch = 0;
     int time = 0;
+    int i = 0;
+    String command;
 
-
+    recipiesMap cookBook;
     Courier courier;
+
+    //initialize the cookBook to have all entries NULL.
+    for(i = 0; i < HASHMAPSIZE; i++){
+        cookBook.hashArray[i] = NULL;
+    }
     
 
+
+    //main while loop
     while(ch != EOF){
 
         //SETUP COURIER
@@ -133,6 +143,33 @@ int main(){
             printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
         }
         else{
+            //CHECK IF COURIER TIME
+            if(time % courier.frequency == 0){
+                
+            }
+
+
+
+
+
+            //RESET ANY PREVIOUS COMMAND
+            for(i = 0; i < STRINGSIZE; i++){
+                command[i] = '\0';
+            }
+            //READ NEW COMMAND
+            i = 0;
+            while((ch = fgetc(stdin)) != ' ' && ch != EOF && ch != '\n'){
+                command[i] = ch;
+                i++;
+            }
+            command[i] = '\0';
+
+            //INTERPRET THE COMMAND
+            if(strcmp("aggiungi_ricetta", command) == 0){
+                addRecipie(cookBook);
+            }
+
+
 
         }
 
@@ -142,6 +179,8 @@ int main(){
 
     return 0;
 }
+
+
 
 
 
@@ -163,8 +202,38 @@ int setupCourier(Courier *c){
     return ch;
 }
 
-void insertRecipie(recipiesMap book, recipie recipie){
+int addRecipie(recipiesMap book){
+    //todo placeholder
+    return 0;
+}
 
+void insertRecipie(recipiesMap book, recipie recipie){
+    int hash = sdbm_hash(recipie.name);
+
+    if(book.hashArray[hash] == NULL){
+        recipiesList head;
+        head.el = recipie;
+        head.next = NULL;
+
+        book.hashArray[hash] = &head;
+    }
+    else{
+        recipiesList node = *book.hashArray[hash];
+
+        while(node.next != NULL){   
+            if(node.el.name == recipie.name)
+                break;
+            else{
+                node = *node.next;
+            }
+        }
+
+        recipiesList newNode;
+        newNode.el = recipie;
+        newNode.next = NULL;
+
+        node.next = &newNode;
+    }
 }
 
 unsigned int sdbm_hash(String string){
