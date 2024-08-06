@@ -31,14 +31,14 @@ struct numberedItem{
 
 
 struct numberedItemList{
-    struct numberedItem     el;
+    struct numberedItem     *el;
     struct numberedItemList *next;
 };
 
 
 struct namedNumberedItemList{
     String                      name;
-    struct numberedItemList     head;
+    struct numberedItemList     *head;
 };
 
 
@@ -104,6 +104,8 @@ int loadCurrier();
 //RECIPIES
 unsigned int    sdbm_hash(String string);
 void            insertRecipie(recipiesMap book, recipie recipie);
+int             readRecipie(recipie *r);
+void            printRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
 recipie         retrieveRecipie(recipiesMap book, String name);
 
@@ -203,6 +205,9 @@ int setupCourier(Courier *c){
 }
 
 int addRecipie(recipiesMap book){
+    recipie *r = malloc(sizeof(*r));
+    readRecipie(r);
+    printRecipie(r);
     //todo placeholder
     return 0;
 }
@@ -233,6 +238,81 @@ void insertRecipie(recipiesMap book, recipie recipie){
         newNode.next = NULL;
 
         node.next = &newNode;
+    }
+}
+
+int readRecipie(recipie *r){
+    int ch;
+    int i = 0;
+
+    //READ NAME
+    while((ch = fgetc(stdin)) != '\n' && ch != ' ' && ch != EOF){
+        r->name[i] = ch;
+        i++;
+    }
+    r->name[i] = '\0';
+
+
+    ingredientList *head = 0;
+    ingredientList *prev = 0;
+    ingredientList *current = 0;
+    
+    //READ INGREDIENTS
+    while(ch != '\n' && ch != EOF){
+        ingredient *ingr;
+        ingr = malloc(sizeof(*ingr));
+
+        //READ INGREDIENT
+        i = 0;
+        while((ch = fgetc(stdin)) != ' '){
+            ingr->name[i] = ch;
+            i++;
+        }
+        ingr->name[i] = '\0';
+
+        //READ AMOUNT
+        i = 0;
+        String amount;
+        while((ch = fgetc(stdin)) != ' ' && ch != '\n' && ch != EOF){
+            amount[i] = ch;
+            i++;
+        }
+        amount[i] = '\0';
+        ingr->amount = atoi(amount);
+
+
+        //STORE INGREDIENT IN NODE
+        if(current != 0){
+            prev = current;
+        }
+        current = malloc(sizeof(*current));
+        current->el = ingr;
+        current->next = 0;
+        //LINK PREV NODE TO NEW NODE
+        if(prev != 0){
+            prev->next = current;
+        }
+        else if(head == 0){
+            head = current;
+        }
+    }
+
+    //ADD LIST OF INGREDIENTS TO RECIPIE
+    r->head = head;
+
+    return ch;
+}
+
+void printRecipie(recipie *r){
+    printf("Recipie name: %s\n", r->name);
+
+    ingredientList *ingr = r->head;
+
+    int i = 0;
+    while(ingr != 0){
+        printf("Ingredient %d: %s, %d\n", i, ingr->el->name, ingr->el->amount);
+        ingr = ingr->next;
+        i++;
     }
 }
 
