@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+#define HASHMAPSIZE 511
+#define STRINGSIZE 255
 
 //METHOD DECLARATION
 int addRecipie();
@@ -14,7 +17,7 @@ int loadCurrier();
 
 //OPERATIONAL STRUCTURES
 typedef struct String {
-    char    characters[255];
+    char    characters[STRINGSIZE];
 } String;
 
 enum Command {
@@ -26,7 +29,7 @@ enum Command {
 
 
 
-#define HASHMAPSIZE 512
+
 
 //STRUCTURES
 typedef struct numberedItem{
@@ -102,19 +105,41 @@ typedef struct Courier{
     orderedItemList head;
 } Courier;
 
+void setupCourier(Courier *c);
 
 
 
 
 int main(){
+    Courier courier;
+    Courier *courierPointer = &courier;
+    
+    setupCourier(courierPointer);
+
+    printf("Frequency: %d\nCapacity: %d", courier.frequency, courier.capacity);
 
     while(1 > 2){
         //Primo check da fare su camioncino
         //Dopo implementare switch case sulle keyword per capire quale funzione chiamare
     }
 
-
-
-    printf("Hello World!");
     return 0;
+}
+
+void setupCourier(Courier *c){
+    String input;
+    int ch;
+    int i = 0;
+
+    printf("Enter the two numbers\n");
+
+    while((ch = fgetc(stdin)) != '\n' && ch != EOF){
+        input.characters[i] = ch;
+        i++;
+    }
+    input.characters[i] = '\0';
+
+    sscanf(input.characters, "%d %d", &c->frequency, &c-> capacity);
+
+    return;
 }
