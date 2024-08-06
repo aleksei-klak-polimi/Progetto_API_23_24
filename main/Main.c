@@ -101,39 +101,50 @@ int order();
 int loadCurrier();
 
 //RECIPIES
-void insertRecipie(recipiesMap book, recipie recipie);
-void deleteRecipie(recipiesMap book, String name);
+void    insertRecipie(recipiesMap book, recipie recipie);
+void    deleteRecipie(recipiesMap book, String name);
 recipie retrieveRecipie(recipiesMap book, String name);
 
 //COURIER
-void setupCourier(Courier *c);
+int setupCourier(Courier *c);
 
 
 
 
 
 int main(){
+    int ch = 0;
+    int time = 0;
+
+
     Courier courier;
-    Courier *courierPointer = &courier;
     
-    setupCourier(courierPointer);
 
-    printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
+    while(ch != EOF){
 
-    while(1 > 2){
-        //Primo check da fare su camioncino
-        //Dopo implementare switch case sulle keyword per capire quale funzione chiamare
+        //SETUP COURIER
+        if(time == 0){
+            Courier *courierPointer = &courier;
+    
+            ch = setupCourier(courierPointer);
+            printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
+        }
+
+
+        time++;
     }
 
     return 0;
 }
 
-void setupCourier(Courier *c){
+
+
+
+
+int setupCourier(Courier *c){
     String input;
     int ch;
     int i = 0;
-
-    printf("Enter the two numbers\n");
 
     while((ch = fgetc(stdin)) != '\n' && ch != EOF){
         input[i] = ch;
@@ -143,5 +154,5 @@ void setupCourier(Courier *c){
 
     sscanf(input, "%d %d", &c->frequency, &c-> capacity);
 
-    return;
+    return ch;
 }
