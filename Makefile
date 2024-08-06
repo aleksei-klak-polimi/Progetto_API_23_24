@@ -8,10 +8,10 @@ SRC = main/Main.c
 OUT_DIR = target
 
 # Define the output binary name
-OUT_BIN = $(OUT_DIR)/Main
+OUT_BIN = $(OUT_DIR)/Main.out
 
 # Define compiler and linker flags
-CFLAGS += -Wall -Werror -std=gnu11
+CFLAGS += -Wall -Werror -std=gnu11 -g3
 LDFLAGS += -lm
 
 # Default target
