@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define HASHMAPSIZE 512
+#define HASHMAPSIZE 1024
 #define STRINGSIZE 256
 
 
@@ -101,9 +101,10 @@ int order();
 int loadCurrier();
 
 //RECIPIES
-void    insertRecipie(recipiesMap book, recipie recipie);
-void    deleteRecipie(recipiesMap book, String name);
-recipie retrieveRecipie(recipiesMap book, String name);
+unsigned int    sdbm_hash(String string);
+void            insertRecipie(recipiesMap book, recipie recipie);
+void            deleteRecipie(recipiesMap book, String name);
+recipie         retrieveRecipie(recipiesMap book, String name);
 
 //COURIER
 int setupCourier(Courier *c);
@@ -160,4 +161,19 @@ int setupCourier(Courier *c){
     sscanf(input, "%d %d", &c->frequency, &c-> capacity);
 
     return ch;
+}
+
+void insertRecipie(recipiesMap book, recipie recipie){
+
+}
+
+unsigned int sdbm_hash(String string){
+    unsigned long hash = 0;
+    int c;
+
+    while((c = *string++)){
+        hash = c + (hash << 6) + (hash << 16) - hash;
+    }
+
+    return hash % HASHMAPSIZE;
 }
