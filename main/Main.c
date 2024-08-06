@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define HASHMAPSIZE 511
-#define STRINGSIZE 255
+#define HASHMAPSIZE 512
+#define STRINGSIZE 256
 
 //METHOD DECLARATION
 int addRecipie();
@@ -16,9 +16,7 @@ int loadCurrier();
 
 
 //OPERATIONAL STRUCTURES
-typedef struct String {
-    char    characters[STRINGSIZE];
-} String;
+typedef char String[STRINGSIZE];
 
 enum Command {
     aggiungi_ricetta,
@@ -134,12 +132,12 @@ void setupCourier(Courier *c){
     printf("Enter the two numbers\n");
 
     while((ch = fgetc(stdin)) != '\n' && ch != EOF){
-        input.characters[i] = ch;
+        input[i] = ch;
         i++;
     }
-    input.characters[i] = '\0';
+    input[i] = '\0';
 
-    sscanf(input.characters, "%d %d", &c->frequency, &c-> capacity);
+    sscanf(input, "%d %d", &c->frequency, &c-> capacity);
 
     return;
 }
