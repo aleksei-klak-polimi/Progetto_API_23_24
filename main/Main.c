@@ -43,7 +43,7 @@ struct namedNumberedItemList{
 
 
 struct namedNumberedItemListList{
-    struct namedNumberedItemList        el;
+    struct namedNumberedItemList        *el;
     struct namedNumberedItemListList    *next;
 };
 
@@ -95,24 +95,25 @@ typedef struct Courier                          Courier;
 
 //METHOD DECLARATION
 //INSTRUCTIONS
-int addRecipie(recipiesMap book);
-int removeRecipie(recipiesMap book);
-int resupply();
-int order();
-int loadCurrier();
+int             addRecipie(recipiesMap *book);
+int             removeRecipie(recipiesMap book);
+int             resupply();
+int             order();
+int             loadCurrier();
 
 //RECIPIES
 unsigned int    sdbm_hash(String string);
-void            insertRecipie(recipiesMap book, recipie recipie);
+void            insertRecipie(recipiesMap *book, recipie *recipie);
 int             readRecipie(recipie *r);
 void            printRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
 recipie         retrieveRecipie(recipiesMap book, String name);
+void            printRecipieBook(recipiesMap *book);
 
 //COURIER
-int setupCourier(Courier *c);
+int             setupCourier(Courier *c);
 
-int updateInventory();
+int             updateInventory();
 
 
 
@@ -168,7 +169,8 @@ int main(){
 
             //INTERPRET THE COMMAND
             if(strcmp("aggiungi_ricetta", command) == 0){
-                addRecipie(cookBook);
+                recipiesMap *book = &cookBook;
+                addRecipie(book);
             }
 
 
@@ -204,40 +206,72 @@ int setupCourier(Courier *c){
     return ch;
 }
 
-int addRecipie(recipiesMap book){
+int addRecipie(recipiesMap *book){
+    int ch;
     recipie *r = malloc(sizeof(*r));
-    readRecipie(r);
-    printRecipie(r);
-    //todo placeholder
-    return 0;
+    ch = readRecipie(r);
+    insertRecipie(book, r);
+    printRecipieBook(book);
+
+    //printRecipie(r);
+
+
+    return ch;
 }
 
-void insertRecipie(recipiesMap book, recipie recipie){
-    int hash = sdbm_hash(recipie.name);
+void insertRecipie(recipiesMap *book, recipie *recipie){
+    int hash = sdbm_hash(recipie->name);
+    int duplicate = 0;
 
-    if(book.hashArray[hash] == NULL){
-        recipiesList head;
-        head.el = recipie;
-        head.next = NULL;
+    if(book->hashArray[hash] == NULL){
+        recipiesList *head;
+        head = malloc(sizeof(*head));
+        head->el = recipie;
+        head->next = NULL;
 
-        book.hashArray[hash] = &head;
+        book->hashArray[hash] = head;
     }
     else{
-        recipiesList node = *book.hashArray[hash];
+        recipiesList *node = book->hashArray[hash];
 
-        while(node.next != NULL){   
-            if(node.el.name == recipie.name)
+        /*
+        While(node != NULL) causes segmentation fault at line node->next = newNode
+        While(node->next != NULL) skips the check on if the names of the recipies are the same when the list is size = 1
+        do while allows to check the name on size 1 and prevents segmentation fault.
+        */
+        do {   
+            if(strcmp(node->el->name, recipie->name) == 0){
+                duplicate = 1;
                 break;
+            }
             else{
-                node = *node.next;
+                node = node->next;
             }
         }
+        while(node->next != NULL);
 
-        recipiesList newNode;
-        newNode.el = recipie;
-        newNode.next = NULL;
+        if(duplicate == 0){
+            recipiesList *newNode;
+            newNode = malloc(sizeof(*newNode));
+            newNode->el = recipie;
+            newNode->next = NULL;
 
-        node.next = &newNode;
+            node->next = newNode;
+        }
+    }
+}
+
+void printRecipieBook(recipiesMap *book){
+    int i;
+    for(i = 0; i < HASHMAPSIZE; i++){
+        if(book->hashArray[i] != NULL){
+            recipiesList *node = book->hashArray[i];
+
+            while(node != NULL){
+                printRecipie(node->el);
+                node = node->next;
+            }
+        }
     }
 }
 
@@ -304,7 +338,7 @@ int readRecipie(recipie *r){
 }
 
 void printRecipie(recipie *r){
-    printf("Recipie name: %s\n", r->name);
+    printf("\nRecipie name: %s\n", r->name);
 
     ingredientList *ingr = r->head;
 
