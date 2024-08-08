@@ -112,7 +112,7 @@ typedef struct Courier                          Courier;
 //INSTRUCTIONS
 int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
-int             resupply();
+int             resupply(warehouseMap *map, warehouseTreeNode *root);
 int             order();
 int             loadCurrier();
 
@@ -125,10 +125,14 @@ void            deleteRecipie(recipiesMap book, String name);
 recipie         retrieveRecipie(recipiesMap book, String name);
 void            printRecipieBook(recipiesMap *book);
 
+//SUPPLIES
+void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
+void            supplyInventory(warehouseMap *map, warehouseTreeNode *root, ingredientLotList *s);
+int             readSupplies(ingredientLotList *s);
+void            printSupplies(ingredientLotList *s);
+
 //COURIER
 int             setupCourier(Courier *c);
-
-int             updateInventory();
 
 
 
