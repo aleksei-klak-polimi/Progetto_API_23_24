@@ -130,6 +130,7 @@ void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
 void            supplyInventory(warehouseMap *map, warehouseTreeNode *root, ingredientLotList *s);
 int             readSupplies(ingredientLotList *s);
 void            printSupplies(ingredientLotList *s);
+void            printInventory(warehouseMap *map, warehouseTreeNode *root);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -144,8 +145,10 @@ int main(){
     int i = 0;
     String command;
 
-    recipiesMap cookBook;
-    Courier courier;
+    recipiesMap         cookBook;
+    warehouseMap        warehouseMap;
+    warehouseTreeNode   warehouseTree;
+    Courier             courier;
 
     //initialize the cookBook to have all entries NULL.
     for(i = 0; i < HASHMAPSIZE; i++){
@@ -200,6 +203,15 @@ int main(){
 
                 //debug
                 printRecipieBook(book);
+            }
+            else if(strcmp("rifornimento", command) == 0){
+                warehouseMap *map =         &warehouseMap;
+                warehouseTreeNode *root =   &warehouseTree;
+
+                //resupply(map, root);
+
+                //debug
+                //printRecipieBook(book);
             }
 
 
