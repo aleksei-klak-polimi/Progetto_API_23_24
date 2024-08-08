@@ -61,7 +61,7 @@ struct numberedTimedItem{
 
 
 struct numberedTimedItemList{
-    struct numberedTimedItem        el;
+    struct numberedTimedItem        *el;
     struct numberedTimedItemList    *next;
 };
 
@@ -146,8 +146,8 @@ int main(){
     String command;
 
     recipiesMap         cookBook;
-    warehouseMap        warehouseMap;
-    warehouseTreeNode   warehouseTree;
+    warehouseMap        whMap;
+    warehouseTreeNode   whTree;
     Courier             courier;
 
     //initialize the cookBook to have all entries NULL.
@@ -205,17 +205,14 @@ int main(){
                 printRecipieBook(book);
             }
             else if(strcmp("rifornimento", command) == 0){
-                warehouseMap *map =         &warehouseMap;
-                warehouseTreeNode *root =   &warehouseTree;
+                warehouseMap *map =         &whMap;
+                warehouseTreeNode *root =   &whTree;
 
-                //resupply(map, root);
+                resupply(map, root);
 
                 //debug
-                //printRecipieBook(book);
+                //printInventory(map, root);
             }
-
-
-
         }
 
 
@@ -368,6 +365,18 @@ int removeRecipie(recipiesMap *book){
     return ch;
 }
 
+int resupply(warehouseMap *map, warehouseTreeNode *root){
+    int ch;
+
+    ingredientLotList *lot;
+    lot = malloc(sizeof(*lot));
+
+    ch = readSupplies(lot);
+    printSupplies(lot);
+
+    return ch;
+}
+
 
 
 
@@ -435,6 +444,64 @@ int readRecipie(recipie *r){
     return ch;
 }
 
+int readSupplies(ingredientLotList *s){
+    int ch = 0;
+    int i;
+    ingredientLotList *current = s;
+
+    while(ch != '\n' && ch != EOF){
+
+
+        //ALLOCATE ELEMENT
+        ingredientLot *el;
+        el = malloc(sizeof(*el));
+
+
+        //READ INGREDIENT NAME
+        i = 0;
+        while((ch = fgetc(stdin)) != ' '){
+            el->name[i] = ch;
+            i++;
+        }
+        el->name[i] = '\0';
+
+
+        //READ INGREDIENT AMOUNT
+        i = 0;
+        String amount;
+        while((ch = fgetc(stdin)) != ' '){
+            amount[i] = ch;
+            i++;
+        }
+        amount[i] = '\0';
+        el->amount = atoi(amount);
+
+
+        //READ INGREDIENT TIME
+        i = 0;
+        String time;
+        while((ch = fgetc(stdin)) != ' ' && ch != '\n' && ch != EOF){
+            time[i] = ch;
+            i++;
+        }
+        time[i] = '\0';
+        el->time = atoi(time);
+
+
+        //UPDATE LIST
+        current->el = el;
+        if(ch == ' '){
+            current->next = malloc(sizeof(*current));
+            current = current->next;
+        }
+        else{
+            current->next = NULL;
+        }
+    }
+
+    return ch;
+}
+
 
 
 
@@ -464,6 +531,16 @@ void printRecipie(recipie *r){
         printf("Ingredient %d: %s, %d\n", i, ingr->el->name, ingr->el->amount);
         ingr = ingr->next;
         i++;
+    }
+}
+
+void printSupplies(ingredientLotList *s){
+    printf("\nLot:\n");
+    
+    ingredientLotList *ingr = s;
+    while(ingr != NULL){
+        printf("Ingredient: %s\nAmount: %d\nExpiration: %d\n", ingr->el->name, ingr->el->amount, ingr->el->time);
+        ingr = ingr->next;
     }
 }
 
