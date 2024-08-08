@@ -96,7 +96,7 @@ typedef struct Courier                          Courier;
 //METHOD DECLARATION
 //INSTRUCTIONS
 int             addRecipie(recipiesMap *book);
-int             removeRecipie(recipiesMap book);
+int             removeRecipie(recipiesMap *book);
 int             resupply();
 int             order();
 int             loadCurrier();
@@ -171,6 +171,16 @@ int main(){
             if(strcmp("aggiungi_ricetta", command) == 0){
                 recipiesMap *book = &cookBook;
                 addRecipie(book);
+
+                //debug
+                printRecipieBook(book);
+            }
+            else if(strcmp("rimuovi_ricetta", command) == 0){
+                recipiesMap *book = &cookBook;
+                removeRecipie(book);
+
+                //debug
+                printRecipieBook(book);
             }
 
 
@@ -211,10 +221,6 @@ int addRecipie(recipiesMap *book){
     recipie *r = malloc(sizeof(*r));
     ch = readRecipie(r);
     insertRecipie(book, r);
-    printRecipieBook(book);
-
-    //printRecipie(r);
-
 
     return ch;
 }
@@ -259,6 +265,76 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
             node->next = newNode;
         }
     }
+}
+
+int removeRecipie(recipiesMap *book){
+    int ch;
+    int i = 0;
+    String name;
+    int hash;
+
+    //READ RECIPIE NAME
+    while((ch = fgetc(stdin)) != '\n' && ch != EOF){
+        name[i] = ch;
+        i++;
+    }
+    name[i] = '\0';
+
+    hash = sdbm_hash(name);
+
+    //CHECK IF MAP CONTAINS HASH
+    if(book->hashArray[hash] == NULL){
+        //todo check if printf is good for stdout
+        printf("non presente\n");
+    }
+    else{
+        //IF MAP CONTAINS HASH CHECK THE LIST FOR MATCHES
+        int found = 0;
+        recipiesList *prev = book->hashArray[hash];
+        recipiesList *target;
+
+        //CHECK IF THE HEAD OF THE LIST IS THE MATCH
+        if(strcmp(book->hashArray[hash]->el->name, name) == 0){
+            found = 1;
+            target = book->hashArray[hash];
+
+            //If next was null then array now has position[hash] = null
+            //if next was another node then old_next is the head at array[hash]
+            book->hashArray[hash] = prev->next;
+        }
+        else{
+            
+            //To keep the list linked, we iterate through the list using prev and see if prev->next is the match
+            //this way we can link together the remainder of the list after we cut out prev->next
+
+            while(prev->next != NULL){
+                if(strcmp(prev->next->el->name, name) == 0){
+                    found = 1;
+                    target = prev->next;
+
+                    //Remove the target from list
+                    prev->next = target->next;
+
+                    break;
+                }
+                else{
+                    prev = prev->next;
+                }
+            }
+        }
+
+        if(found == 0){
+            //todo check if printf is good for stdout
+            printf("non presente\n");
+        }
+        else{
+            //CLEARING MEMORY
+            free(target);
+            printf("rimossa\n");
+        }
+    }
+
+    return ch;
 }
 
 
