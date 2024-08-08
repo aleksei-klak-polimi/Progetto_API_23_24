@@ -65,6 +65,18 @@ struct numberedTimedItemList{
     struct numberedTimedItemList    *next;
 };
 
+
+struct numberedTimedItemListMap{
+    struct numberedTimedItemList *hashArray[HASHMAPSIZE];
+};
+
+struct numberedTimedItemListTree{
+    struct numberedTimedItemList *root;
+    struct numberedTimedItemList *right;
+    struct numberedTimedItemList *left;
+};
+
+
 struct Courier{
     int                             frequency;
     int                             capacity;
@@ -84,8 +96,11 @@ typedef struct namedNumberedItemListListMap     recipiesMap;
 
 typedef struct numberedTimedItem                orderedItem;
 typedef struct numberedTimedItemList            orderedItemList;
+
 typedef struct numberedTimedItem                ingredientLot;
 typedef struct numberedTimedItemList            ingredientLotList;
+typedef struct numberedTimedItemListMap         warehouseMap;
+typedef struct numberedTimedItemListTree        warehouseTreeNode;
 
 typedef struct Courier                          Courier;
 
