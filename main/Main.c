@@ -261,20 +261,11 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
     }
 }
 
-void printRecipieBook(recipiesMap *book){
-    int i;
-    for(i = 0; i < HASHMAPSIZE; i++){
-        if(book->hashArray[i] != NULL){
-            recipiesList *node = book->hashArray[i];
 
-            while(node != NULL){
-                printRecipie(node->el);
-                node = node->next;
-            }
-        }
-    }
-}
 
+
+
+//PARSING FUNCTIONS
 int readRecipie(recipie *r){
     int ch;
     int i = 0;
@@ -337,6 +328,25 @@ int readRecipie(recipie *r){
     return ch;
 }
 
+
+
+
+
+//DEBUG PRINTING FUNCTIONS
+void printRecipieBook(recipiesMap *book){
+    int i;
+    for(i = 0; i < HASHMAPSIZE; i++){
+        if(book->hashArray[i] != NULL){
+            recipiesList *node = book->hashArray[i];
+
+            while(node != NULL){
+                printRecipie(node->el);
+                node = node->next;
+            }
+        }
+    }
+}
+
 void printRecipie(recipie *r){
     printf("\nRecipie name: %s\n", r->name);
 
@@ -350,6 +360,11 @@ void printRecipie(recipie *r){
     }
 }
 
+
+
+
+
+//UTILITY FUNCTIONS
 unsigned int sdbm_hash(String string){
     unsigned long hash = 0;
     int c;
