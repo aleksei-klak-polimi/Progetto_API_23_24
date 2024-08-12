@@ -83,11 +83,12 @@ struct numberedTimedItemListMap{
 
 struct numberedTimedItemListTree{
     int         expiration;
-    StringList  ingredients;
+    StringList  *ingredients;
 
-    struct numberedTimedItemList *root;
-    struct numberedTimedItemList *right;
-    struct numberedTimedItemList *left;
+    int                              isBlack;
+    struct numberedTimedItemListTree *parent;
+    struct numberedTimedItemListTree *right;
+    struct numberedTimedItemListTree *left;
 };
 
 
@@ -143,6 +144,7 @@ void            printRecipieBook(recipiesMap *book);
 //SUPPLIES
 void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
 void            supplyInventory(warehouseMap *map, warehouseTreeNode *root, ingredientLotList *s);
+void            addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s);
 int             readSupplies(ingredientLotList *s);
 void            printSupplies(ingredientLotList *s);
 void            printInventory(warehouseMap *map, warehouseTreeNode *root);
@@ -390,6 +392,159 @@ int resupply(warehouseMap *map, warehouseTreeNode *root){
     printSupplies(lot);
 
     return ch;
+}
+
+void addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s){
+    /*  Using double pointer to reference the root because:
+        If the tree is still empty then we have to do a malloc
+        The malloc assign to the pointer a new memory address
+        If we give a simple pointer and malloc, then the caller function has no access to the new malloc memory
+        If we have a pointer that points to the head then we can malloc the head and the caller still has the reference to
+        the double pointer therefore sees the new malloc-ed memory.
+    */
+
+
+    if(*d_root == NULL){
+        //If the double pointer points to NULL then we need to initialize the tree with a root.
+        warehouseTreeNode *root = malloc(sizeof(*root));
+        d_root = &root;
+
+        root->right = NULL;
+        root->left = NULL;
+        root->parent = NULL;
+        root->expiration = s->time;
+        root->isBlack = 1;
+        
+        StringList *ingredients = malloc(sizeof(*ingredients));
+        strcpy(ingredients->el, s->name);
+        ingredients->next = NULL;
+        root->ingredients = ingredients;
+    }
+    else{
+        //The double pointer points to a valid root therefore we need to insert into the tree
+
+        int lotExpiration = s->time;
+        int parentFound = 0;
+        warehouseTreeNode *parentLeaf = *d_root;
+
+
+        //Navigating tree to find closest leaf to lot expiration
+        while(parentFound == 0){
+            if(parentLeaf->expiration > lotExpiration){
+                if(parentLeaf->left == NULL){
+                    parentFound = 1;
+                }
+                else{
+                    parentLeaf = parentLeaf->left;
+                }
+            }
+            else if(parentLeaf->expiration < lotExpiration){
+                if(parentLeaf->right == NULL){
+                    parentFound = 1;
+                }
+                else{
+                    parentLeaf = parentLeaf->right;
+                }
+            }
+            else if(parentLeaf->expiration == lotExpiration){
+                parentFound = 1;
+            }
+        }
+
+        if(parentLeaf->expiration == lotExpiration){
+            //Leaf with required expiration already exists, no new leafs created, only adding ingredient to list.
+            StringList *ingredients = parentLeaf->ingredients;
+
+            int breaker = 0;
+            while(breaker == 0){
+                if(strcmp(ingredients->el, s->name) == 0){
+                    breaker = 1;
+                }
+                else if(ingredients->next == NULL){
+                    StringList *node = malloc(sizeof(*node));
+                    strcpy(node->el, s->name);
+                    node->next = NULL;
+                    ingredients->next = node;
+
+                    breaker = 1;
+                }
+                else{
+                    ingredients = ingredients->next;
+                }
+            }
+        }
+        else{
+            //No existing leaf has required expiration, creating new leaf
+            warehouseTreeNode *leaf = malloc(sizeof(*leaf));
+
+            leaf->right = NULL;
+            leaf->left = NULL;
+            leaf->parent = parentLeaf;
+            leaf->expiration = lotExpiration;
+            leaf->isBlack = 0;
+        
+            StringList *ingredients = malloc(sizeof(*ingredients));
+            strcpy(ingredients->el, s->name);
+            ingredients->next = NULL;
+            leaf->ingredients = ingredients;
+
+            if(parentLeaf->expiration > lotExpiration){
+                parentLeaf->left = leaf;
+            }
+            else if(parentLeaf->expiration < lotExpiration){
+                parentLeaf->right = leaf;
+            }
+
+
+            //Red-Black tree may not balanced, may need to perform a rotation
+            if(parentLeaf->isBlack == 0){
+                //parent is red
+                //recoloring parent and uncle to black
+                parentLeaf->parent->right->isBlack = 1;
+                parentLeaf->parent->left->isBlack = 1;
+
+                //Moving up one level
+                warehouseTreeNode *grandpa = parentLeaf->parent;
+                warehouseTreeNode *greatGrandpa = grandpa->parent;
+
+                //Determining which rotation to perform
+                if(grandpa->right->expiration == parentLeaf->expiration){
+                    //Perform left rotation on grandpa
+                    grandpa->parent = parentLeaf;
+                    grandpa->right = parentLeaf->left;
+
+                    parentLeaf->left->parent = grandpa;
+
+                    parentLeaf->left = grandpa;
+                    parentLeaf->parent = greatGrandpa;
+
+                    if(greatGrandpa->right->expiration == grandpa->expiration){
+                        greatGrandpa->right = parentLeaf;
+                    }
+                    else{
+                        greatGrandpa->left = parentLeaf;
+                    }
+                }
+                else{
+                    //Perform right rotation on grandpa
+                    grandpa->parent = parentLeaf;
+                    grandpa->left = parentLeaf->right;
+
+                    parentLeaf->right->parent = grandpa;
+
+                    parentLeaf->right = grandpa;
+                    parentLeaf->parent = greatGrandpa;
+
+                    if(greatGrandpa->right->expiration == grandpa->expiration){
+                        greatGrandpa->right = parentLeaf;
+                    }
+                    else{
+                        greatGrandpa->left = parentLeaf;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
