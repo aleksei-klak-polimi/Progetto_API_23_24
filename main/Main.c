@@ -17,13 +17,6 @@ typedef struct StringList{
     struct StringList   *next;
 }StringList;
 
-enum Command {
-    aggiungi_ricetta,
-    rimuovi_ricetta,
-    rifornimento,
-    ordine
-};
-
 
 
 
@@ -238,8 +231,6 @@ int main(){
 
     return 0;
 }
-
-
 
 
 
