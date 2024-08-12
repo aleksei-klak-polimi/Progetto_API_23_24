@@ -12,6 +12,11 @@
 //OPERATIONAL STRUCTURES
 typedef char String[STRINGSIZE];
 
+typedef struct StringList{
+    String              el;
+    struct StringList   *next;
+}StringList;
+
 enum Command {
     aggiungi_ricetta,
     rimuovi_ricetta,
@@ -65,12 +70,21 @@ struct numberedTimedItemList{
     struct numberedTimedItemList    *next;
 };
 
-
-struct numberedTimedItemListMap{
-    struct numberedTimedItemList *hashArray[HASHMAPSIZE];
+struct numberedTimedItemListList{
+    struct numberedTimedItemList        *el;
+    struct numberedTimedItemListList    *next;
 };
 
+
+struct numberedTimedItemListMap{
+    struct numberedTimedItemListList *hashArray[HASHMAPSIZE];
+};
+
+
 struct numberedTimedItemListTree{
+    int         expiration;
+    StringList  ingredients;
+
     struct numberedTimedItemList *root;
     struct numberedTimedItemList *right;
     struct numberedTimedItemList *left;
@@ -99,6 +113,7 @@ typedef struct numberedTimedItemList            orderedItemList;
 
 typedef struct numberedTimedItem                ingredientLot;
 typedef struct numberedTimedItemList            ingredientLotList;
+typedef struct numberedTimedItemListList        ingredientLotListList;
 typedef struct numberedTimedItemListMap         warehouseMap;
 typedef struct numberedTimedItemListTree        warehouseTreeNode;
 
