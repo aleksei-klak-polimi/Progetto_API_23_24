@@ -138,6 +138,12 @@ void            printRecipieBook(recipiesMap *book);
 void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
 void            supplyInventory(warehouseMap *map, warehouseTreeNode *root, ingredientLotList *s);
 void            addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s);
+StringList      *removeExpiredIngredientFromTree(warehouseTreeNode **d_root, int time);
+void            deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node);
+void            rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x);
+void            rebalanceTreeAfterInsertion(warehouseTreeNode **root, warehouseTreeNode *x);
+void            leftRotate(warehouseTreeNode **root, warehouseTreeNode *x);
+void            rightRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 int             readSupplies(ingredientLotList *s);
 void            printSupplies(ingredientLotList *s);
 void            printInventory(warehouseMap *map, warehouseTreeNode *root);
@@ -385,6 +391,11 @@ int resupply(warehouseMap *map, warehouseTreeNode *root){
     return ch;
 }
 
+
+
+
+
+//RED-BLACK TREE WAREHOUSE FUNCTIONS
 void addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s){
     /*  Using double pointer to reference the root because:
         If the tree is still empty then we have to do a malloc
@@ -488,55 +499,292 @@ void addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s){
 
 
             //Red-Black tree may not balanced, may need to perform a rotation
-            if(parentLeaf->isBlack == 0){
-                //parent is red
-                //recoloring parent and uncle to black
-                parentLeaf->parent->right->isBlack = 1;
-                parentLeaf->parent->left->isBlack = 1;
-
-                //Moving up one level
-                warehouseTreeNode *grandpa = parentLeaf->parent;
-                warehouseTreeNode *greatGrandpa = grandpa->parent;
-
-                //Determining which rotation to perform
-                if(grandpa->right->expiration == parentLeaf->expiration){
-                    //Perform left rotation on grandpa
-                    grandpa->parent = parentLeaf;
-                    grandpa->right = parentLeaf->left;
-
-                    parentLeaf->left->parent = grandpa;
-
-                    parentLeaf->left = grandpa;
-                    parentLeaf->parent = greatGrandpa;
-
-                    if(greatGrandpa->right->expiration == grandpa->expiration){
-                        greatGrandpa->right = parentLeaf;
-                    }
-                    else{
-                        greatGrandpa->left = parentLeaf;
-                    }
-                }
-                else{
-                    //Perform right rotation on grandpa
-                    grandpa->parent = parentLeaf;
-                    grandpa->left = parentLeaf->right;
-
-                    parentLeaf->right->parent = grandpa;
-
-                    parentLeaf->right = grandpa;
-                    parentLeaf->parent = greatGrandpa;
-
-                    if(greatGrandpa->right->expiration == grandpa->expiration){
-                        greatGrandpa->right = parentLeaf;
-                    }
-                    else{
-                        greatGrandpa->left = parentLeaf;
-                    }
-                }
-            }
+            rebalanceTreeAfterInsertion(d_root, leaf);
         }
     }
 }
+
+StringList *removeExpiredIngredientFromTree(warehouseTreeNode **d_root, int time){
+    if(*d_root == NULL){
+        return NULL;
+    }
+
+    StringList *returnList;
+    warehouseTreeNode *leaf = *d_root;
+    int breaker = 0;
+    int removeLeaf = 0;
+    while(breaker == 0){
+        if(leaf->expiration == time){
+            returnList = leaf->ingredients;
+            removeLeaf = 1;
+            breaker = 1;
+        }
+        else if(leaf->expiration > time){
+            if(leaf->left == NULL){
+                return NULL;
+            }
+            else{
+                leaf = leaf->left;
+            }
+        }
+        else if(leaf->expiration < time){
+            if(leaf->right == NULL){
+                return NULL;
+            }
+            else{
+                leaf = leaf->right;
+            }
+        }
+    }
+    if(removeLeaf == 1){
+        deleteNodeFromTree(d_root, leaf);
+    }
+
+    return returnList;
+}
+
+void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
+    //STEP 1: perform simple deletion
+
+
+    //If node has no children simply delete node
+    if(node->right == NULL && node->left == NULL){
+        warehouseTreeNode *parent = node->parent;
+
+        if(parent != NULL){
+            //If the node to delete is not the root then sever the parent-child connection
+            if(parent->right == node){
+                parent->right = NULL;
+            }
+            else{
+                parent->left = NULL;
+            }
+            //todo check if this free does not delete the list I am returning
+            free(node);
+            rebalanceTreeAfterDelete(root, parent);
+        }
+        else{
+            //The node to delete is the root
+            *root = NULL;
+
+            //todo check if this free does not delete the list I am returning
+            free(node);
+        }
+    }
+
+
+    //If node has one child copy the child in the parent and delete the child
+    else if(node->right == NULL || node->left == NULL){
+
+        warehouseTreeNode *child;
+        warehouseTreeNode *parent = node;
+        
+        if(parent->right != NULL){
+            child = parent->right;
+        }
+        else{
+            child = parent->left;
+        }
+
+        parent->expiration = child->expiration;
+        parent->ingredients = child->ingredients;
+        parent->right = child->right;
+        parent->left = child->left;
+
+        if(child->right != NULL){
+            child->right->parent = parent;
+        }
+        if(child->left != NULL){
+            child->left->parent = parent;
+        }
+
+        //todo check if this free does not delete the list I am returning
+        free(child);
+        rebalanceTreeAfterDelete(root, parent);
+    }
+
+
+    //If node has two children, find its successor, copy it into the node and perform deletion of the successor
+    else if(node->right != NULL && node->left != NULL){
+        //find smallest successor to our node
+        warehouseTreeNode *successor = node->right;
+
+        int breaker = 0;
+        while(breaker == 0){
+            if(successor->left == NULL){
+                breaker = 1;
+            }
+            else{
+                successor = successor->left;
+            }
+        }
+
+        //copy contents of successor into node
+        node->expiration = successor->expiration;
+        node->ingredients = successor->ingredients;
+
+        //remove old successor node from tree
+        deleteNodeFromTree(root, successor);
+    }
+}
+
+void rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x){
+    // While x is not the root and x is black
+    while (x != *root && x->isBlack) {
+        if (x == x->parent->left) {  // x is the left child
+            warehouseTreeNode *w = x->parent->right; // w is x's sibling
+            if (!w->isBlack) { // Case 1: x's sibling w is red
+                w->isBlack = 1;               // Recolor w as black
+                x->parent->isBlack = 0;        // Recolor x's parent as red
+                leftRotate(root, x->parent);   // Left rotate on x's parent
+                w = x->parent->right;          // Update w to be the new sibling of x
+            }
+            if (w->left->isBlack && w->right->isBlack) { // Case 2: Both of w's children are black
+                w->isBlack = 0;               // Recolor w as red
+                x = x->parent;                // Move x up the tree
+            } else {
+                if (w->right->isBlack) { // Case 3: w's right child is black
+                    w->left->isBlack = 1;    // Recolor w's left child as black
+                    w->isBlack = 0;          // Recolor w as red
+                    rightRotate(root, w);    // Right rotate on w
+                    w = x->parent->right;    // Update w to be the new sibling of x
+                }
+                // Case 4: w's right child is red
+                w->isBlack = x->parent->isBlack; // Make w the same color as x's parent
+                x->parent->isBlack = 1;          // Recolor x's parent as black
+                w->right->isBlack = 1;           // Recolor w's right child as black
+                leftRotate(root, x->parent);     // Left rotate on x's parent
+                x = *root;                       // Set x to root to end loop
+            }
+        } else {  // Symmetric case: x is the right child
+            warehouseTreeNode *w = x->parent->left;
+            if (!w->isBlack) { // Case 1: x's sibling w is red
+                w->isBlack = 1;
+                x->parent->isBlack = 0;
+                rightRotate(root, x->parent);
+                w = x->parent->left;
+            }
+            if (w->left->isBlack && w->right->isBlack) { // Case 2: Both of w's children are black
+                w->isBlack = 0;
+                x = x->parent;
+            } else {
+                if (w->left->isBlack) { // Case 3: w's left child is black
+                    w->right->isBlack = 1;
+                    w->isBlack = 0;
+                    leftRotate(root, w);
+                    w = x->parent->left;
+                }
+                // Case 4: w's left child is red
+                w->isBlack = x->parent->isBlack;
+                x->parent->isBlack = 1;
+                w->left->isBlack = 1;
+                rightRotate(root, x->parent);
+                x = *root;
+            }
+        }
+    }
+    x->isBlack = 1; // Ensure the root node is always black
+}
+
+void rebalanceTreeAfterInsertion(warehouseTreeNode **root, warehouseTreeNode *x){
+    if(*root == x){
+        x->isBlack = 1;
+        return;
+    }
+    else{
+        warehouseTreeNode *child = x;
+        warehouseTreeNode *parent;
+        warehouseTreeNode *grandpa;
+        warehouseTreeNode *uncle;
+
+        while(child != *root && parent->isBlack == 0){
+            parent = child->parent;
+            grandpa = parent->parent;
+
+            if(parent == grandpa->left){
+                uncle = grandpa->right;
+
+                if(uncle != NULL && uncle->isBlack == 0){   // Case 1: Uncle is red
+                    parent->isBlack = 1;                    // Recolor parent black
+                    uncle->isBlack = 1;                     // Recolor uncle black
+                    grandpa->isBlack = 0;                   // Recolor grandparent red
+
+                    child = grandpa;                        //Restart from grandparent
+                }
+                else{
+                    if(child == parent->right){
+                        child = parent;
+                        parent = child->parent;
+                        grandpa = parent->parent;
+                        leftRotate(root, child);
+                    }
+                    parent->isBlack = 1;
+                    grandpa->isBlack = 0;
+                    rightRotate(root, grandpa);
+                }
+            }
+            else{
+                uncle = grandpa->left;
+                if(uncle != NULL && uncle->isBlack == 0){
+                    parent->isBlack = 1;
+                    uncle->isBlack = 1;
+                    grandpa->isBlack = 0;
+
+                    child = grandpa;
+                }
+                else{
+                    if(child == parent->left){
+                        child = parent;
+                        parent = child->parent;
+                        grandpa = parent->parent;
+                        rightRotate(root, child);
+                    }
+                    parent->isBlack = 1;
+                    grandpa->isBlack = 0;
+                    leftRotate(root, grandpa);
+                }
+            }
+        }
+        (*root)->isBlack = 1;
+    }
+}
+
+void leftRotate(warehouseTreeNode **root, warehouseTreeNode *x) {
+    warehouseTreeNode *y = x->right;
+    x->right = y->left;
+    if (y->left != NULL) {
+        y->left->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == NULL) {
+        *root = y;
+    } else if (x == x->parent->left) {
+        x->parent->left = y;
+    } else {
+        x->parent->right = y;
+    }
+    y->left = x;
+    x->parent = y;
+}
+
+void rightRotate(warehouseTreeNode **root, warehouseTreeNode *y) {
+    warehouseTreeNode *x = y->left;
+    y->left = x->right;
+    if (x->right != NULL) {
+        x->right->parent = y;
+    }
+    x->parent = y->parent;
+    if (y->parent == NULL) {
+        *root = x;
+    } else if (y == y->parent->left) {
+        y->parent->left = x;
+    } else {
+        y->parent->right = x;
+    }
+    x->right = y;
+    y->parent = x;
+}
+
 
 
 
