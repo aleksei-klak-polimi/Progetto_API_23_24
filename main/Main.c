@@ -138,7 +138,7 @@ void            printRecipieBook(recipiesMap *book);
 void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
 void            supplyInventory(warehouseMap *map, warehouseTreeNode *root, ingredientLotList *s);
 void            addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s);
-StringList      *removeExpiredIngredientFromTree(warehouseTreeNode **d_root, int time);
+StringList      *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time);
 void            deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node);
 void            rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x);
 void            rebalanceTreeAfterInsertion(warehouseTreeNode **root, warehouseTreeNode *x);
@@ -188,7 +188,7 @@ int main(){
         else{
             warehouseTreeNode **root =   &whTree;
             //Remove expired ingredients
-            removeExpiredIngredientFromTree(root, time);
+            removeNodeFromTreeByTime(root, time);
             printf("\nRemoved expired:\n");
             printRBTree(*root, 0);
 
@@ -531,7 +531,7 @@ void addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s){
     }
 }
 
-StringList *removeExpiredIngredientFromTree(warehouseTreeNode **d_root, int time){
+StringList *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time){
     if(*d_root == NULL){
         return NULL;
     }
