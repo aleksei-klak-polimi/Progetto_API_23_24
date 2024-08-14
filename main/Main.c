@@ -41,6 +41,7 @@ struct namedNumberedItemList{
 
 
 struct namedNumberedItemListList{
+    int                                 ordersPending;
     struct namedNumberedItemList        *el;
     struct namedNumberedItemListList    *next;
 };
@@ -143,7 +144,7 @@ typedef struct Courier                          Courier;
 int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
 int             resupply(warehouseMap *map, warehouseTreeNode **root);
-int             order(warehouseMap *map, warehouseTreeNode **root, int time);
+int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
 int             loadCurrier();
 
 //RECIPIES
@@ -152,7 +153,7 @@ void            insertRecipie(recipiesMap *book, recipie *recipie);
 int             readRecipie(recipie *r);
 void            printRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
-recipie         retrieveRecipie(recipiesMap book, String name);
+recipie         *retrieveRecipie(recipiesMap *book, String name);
 void            printRecipieBook(recipiesMap *book);
 
 //SUPPLIES
@@ -178,6 +179,7 @@ int             removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, 
 //ORDERS
 int             readOrder(orderedItem *item, int time);
 void            printOrder(orderedItem *item);
+void            addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -318,6 +320,7 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
         head = malloc(sizeof(*head));
         head->el = recipie;
         head->next = NULL;
+        head->ordersPending = 0;
 
         book->hashArray[hash] = head;
     }
@@ -345,6 +348,7 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
             newNode = malloc(sizeof(*newNode));
             newNode->el = recipie;
             newNode->next = NULL;
+            newNode->ordersPending = 0;
 
             node->next = newNode;
         }
@@ -374,17 +378,21 @@ int removeRecipie(recipiesMap *book){
     else{
         //IF MAP CONTAINS HASH CHECK THE LIST FOR MATCHES
         int found = 0;
+        int allowed = 0;
         recipiesList *prev = book->hashArray[hash];
         recipiesList *target;
 
         //CHECK IF THE HEAD OF THE LIST IS THE MATCH
         if(strcmp(book->hashArray[hash]->el->name, name) == 0){
             found = 1;
-            target = book->hashArray[hash];
+            if(book->hashArray[hash]->ordersPending != 0){
+                allowed = 1;
+                target = book->hashArray[hash];
 
-            //If next was null then array now has position[hash] = null
-            //if next was another node then old_next is the head at array[hash]
-            book->hashArray[hash] = prev->next;
+                //If next was null then array now has position[hash] = null
+                //if next was another node then old_next is the head at array[hash]
+                book->hashArray[hash] = prev->next;
+            }
         }
         else{
             
@@ -394,12 +402,15 @@ int removeRecipie(recipiesMap *book){
             while(prev->next != NULL){
                 if(strcmp(prev->next->el->name, name) == 0){
                     found = 1;
-                    target = prev->next;
+                    if(book->hashArray[hash]->ordersPending != 0){
+                        allowed = 1;
+                        target = prev->next;
 
-                    //Remove the target from list
-                    prev->next = target->next;
+                        //Remove the target from list
+                        prev->next = target->next;
 
-                    break;
+                        break;
+                    }
                 }
                 else{
                     prev = prev->next;
@@ -411,14 +422,37 @@ int removeRecipie(recipiesMap *book){
             //todo check if printf is good for stdout
             printf("non presente\n");
         }
-        else{
+        else if(allowed == 1){
             //CLEARING MEMORY
             free(target);
             printf("rimossa\n");
         }
+        else if(found == 1 && allowed == 0){
+            //the recipie was found but is in use by pending orders
+            printf("non presente\n");
+        }
     }
 
     return ch;
+}
+
+recipie *retrieveRecipie(recipiesMap *book, String name){
+    //Given the provided book and recipie name, the function returns a pointer to the recipie if it is found in the book.
+    //Returns null otherwise
+
+    int hash = sdbm_hash(name);
+    recipiesList *hashHead = book->hashArray[hash];
+
+    while(hashHead != NULL){
+        if(strcmp(hashHead->el->name, name) == 0){
+            return hashHead->el;
+        }
+        else{
+            hashHead = hashHead->next;
+        }
+    }
+
+    return NULL;
 }
 
 int resupply(warehouseMap *map, warehouseTreeNode **root){
@@ -1149,16 +1183,121 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
 
 
 //ORDER HANDLING
-int order(warehouseMap *map, warehouseTreeNode **root, int time){
+int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time){
     int ch;
 
     orderedItem *item = malloc(sizeof(*item));
     ch = readOrder(item, time);
 
-    
+    recipie *recipie = retrieveRecipie(book, item->name);
 
+    if(recipie == NULL){
+        //No matching recipie was found, order refused and cleared from memory
+        printf("rifiutato\n");
+        free(item);
+    }
+    else{
+
+        orderedItemList *orderNode = malloc(sizeof(*orderNode));
+        orderNode->el = item;
+        orderNode->next = NULL;
+
+        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, item->amount) == 1){
+            //The order was processed immediately, adding to orders ready
+            if(ordersReady->head == NULL){
+                ordersReady->head = orderNode;
+            }
+            if(ordersReady->tail != NULL){
+                ordersReady->tail->next = orderNode;
+            }
+            ordersReady->tail = orderNode;
+        }
+        else{
+            //The order could not be processed due to lacking ingredients, adding order to waiting queue and to ingredientMap
+            if(ordersWaiting->head == NULL){
+                ordersWaiting->head = orderNode;
+            }
+            if(ordersWaiting->tail != NULL){
+                ordersWaiting->tail->next = orderNode;
+            }
+            ordersWaiting->tail = orderNode;
+
+
+            addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
+        }
+    }
 
     return ch;
+}
+
+void addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead){
+
+    ingredientList *ingredientNode = ingredientsHead;
+    int hash;
+    orderedItemQueueList *hashHead;
+    orderedItemQueue *ordersQueue;
+    orderedItemList *orderNode;
+
+    while(ingredientNode != NULL){
+        hash = sdbm_hash(ingredientNode->el->name);
+
+        hashHead = ordersByIngredient->hashArray[hash];
+        
+        if(hashHead == NULL){
+            //Hash head is empty, need to create new list of queues
+
+            hashHead = malloc(sizeof(*hashHead));
+            ordersByIngredient->hashArray[hash] = hashHead;
+        
+            ordersQueue = malloc(sizeof(*ordersQueue));
+            hashHead->el = ordersQueue;
+
+            orderNode = malloc(sizeof(*orderNode));
+            orderNode->el = item;
+            orderNode->next = NULL;
+
+            ordersQueue->head = orderNode;
+            ordersQueue->tail = orderNode;
+            strcpy(ordersQueue->ingredient, ingredientNode->el->name);
+        }
+        else{
+            //There already is a hashHead, try to locate the correct queue
+            ordersQueue = hashHead->el;
+
+            int breaker = 0;
+            while(breaker == 0){
+                if(strcmp(ordersQueue->ingredient, ingredientNode->el->name) == 0 ){
+                    //Correct queue located
+                    breaker = 1;
+
+                    orderNode = malloc(sizeof(*orderNode));
+                    orderNode->el = item;
+                    orderNode->next = NULL;
+
+                    ordersQueue->tail->next = orderNode;
+                    ordersQueue->tail = orderNode;
+                }
+                else if(hashHead->next != NULL){
+                    hashHead = hashHead->next;
+                }
+                else{
+                    breaker = 1;
+
+                    //No mathcing hashHead was found, inserting new HashHead
+                    hashHead->next = malloc(sizeof(*hashHead));
+                    hashHead = hashHead->next;
+
+                    ordersQueue = malloc(sizeof(*ordersQueue));
+                    hashHead->el = ordersQueue;
+                    hashHead->next = NULL;
+
+                    ordersQueue->head = orderNode;
+                    ordersQueue->tail = orderNode;
+                    strcpy(ordersQueue->ingredient, ingredientNode->el->name);
+                }
+            }
+        }
+    }
 }
 
 
