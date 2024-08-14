@@ -196,6 +196,11 @@ int main(){
 
     recipiesMap         cookBook;
     warehouseMap        whMap;
+
+    orderedItemQueueMap *ordersByIngredientsMap;
+    orderedItemQueue    *ordersReady;
+    orderedItemQueue    *ordersPending;
+
     warehouseTreeNode   *whTree = NULL;
     Courier             courier;
 
@@ -203,6 +208,7 @@ int main(){
     for(i = 0; i < HASHMAPSIZE; i++){
         cookBook.hashArray[i] = NULL;
     }
+    //todo finish initializing other structures
     
 
 
@@ -270,8 +276,9 @@ int main(){
             }
             else if(strcmp("ordine", command) == 0){
                 warehouseMap *map = &whMap;
+                recipiesMap *book = &cookBook;
 
-                order(map, root, time);
+                order(map, root, book, ordersReady, ordersPending, ordersByIngredientsMap, time);
             }
         }
 
