@@ -153,6 +153,7 @@ void            addIngredientToMap(warehouseMap *map, ingredientLot*s);
 void            removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient);
 void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
 void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient);
+int             removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMap *map, recipie *recipie);
 
 //COURIER
 int             setupCourier(Courier *c);
