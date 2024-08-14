@@ -149,6 +149,7 @@ void            printSupplies(ingredientLotList *s);
 void            printRBTree(warehouseTreeNode *node, int level);
 void            printSpaces(int count);
 void            addIngredientToMap(warehouseMap *map, ingredientLot*s);
+void            removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -604,6 +605,51 @@ void removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String
         ingredients->next = ingredientFound->next;
         free(ingredientFound);
     }
+}
+
+void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient){
+    int hash = sdbm_hash(ingredient);
+    ingredientLotListList *hashHead = map->hashArray[hash];
+    ingredientLotListList *prevHashHead = NULL;
+    ingredientLotList *ingredientHead = NULL;
+    ingredientLotList *prevIngredientHead = NULL;
+
+    while(ingredientHead == NULL){
+        if(strcmp(hashHead->el->el->name, ingredient) == 0){
+            ingredientHead = hashHead->el;
+        }
+        else{
+            prevHashHead = hashHead;
+            hashHead = hashHead->next;
+        }
+    }
+
+    while(ingredientHead->el->time != time){
+        prevIngredientHead = ingredientHead;
+        ingredientHead = ingredientHead->next;
+    }
+
+    //Clean List
+    if(prevIngredientHead != NULL){
+        prevIngredientHead->next = ingredientHead->next;
+    }
+    else if(ingredientHead->next != NULL){
+        hashHead->el = ingredientHead->next;
+    }
+    else{
+        //Ingredient removed was the only ingredient in the list
+        //Cleaning ListList
+        if(prevHashHead != NULL){
+            prevHashHead->next = hashHead->next;
+        }
+        else{
+            map->hashArray[hash] = hashHead->next;
+        }
+        free(hashHead);
+    }
+    free(ingredientHead->el);
+    free(ingredientHead);
+
 }
 
 void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
