@@ -64,6 +64,7 @@ struct numberedTimedItemList{
 };
 
 struct numberedTimedItemListList{
+    int                                 totalAmount;
     struct numberedTimedItemList        *el;
     struct numberedTimedItemListList    *next;
 };
@@ -924,6 +925,7 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
         ingredientLotList *ingredientHead = malloc(sizeof(*ingredientHead));
 
         hashHead->el = ingredientHead;
+        hashHead->totalAmount = s->amount;
         hashHead->next = NULL;
 
         ingredientHead->el = s;
@@ -957,6 +959,7 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
             ingredientHead = malloc(sizeof(*ingredientHead));
 
             hashHead->el = ingredientHead;
+            hashHead->totalAmount = s->amount;
             hashHead->next = NULL;
 
             ingredientHead->el = s;
@@ -965,6 +968,7 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
         else{
             //HashHead points to the beginning of the correct ingredientHead
             //Need to locate correct position inside ingredientList
+            hashHead->totalAmount += s->amount;
             ingredientLotList *currentIngredientLot = hashHead->el;
 
             if(currentIngredientLot->el->time == s->time){
