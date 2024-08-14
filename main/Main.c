@@ -532,6 +532,19 @@ void addIngredientToTree(warehouseTreeNode **d_root, ingredientLot *s){
     }
 }
 
+void removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap *map, int time){
+    //Removes all ingredients with expiration at the provided time from both Map and tree
+    StringList *ingredients = removeNodeFromTreeByTime(root, time);
+
+    StringList *prev;
+    while(ingredients != NULL){
+        removeIngredientFromMapByTime(map, time, ingredients->el);
+        prev = ingredients;
+        ingredients = ingredients->next;
+        free(prev);
+    }
+}
+
 StringList *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time){
     if(*d_root == NULL){
         return NULL;
