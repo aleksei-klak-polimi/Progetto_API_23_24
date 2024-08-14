@@ -570,6 +570,42 @@ StringList *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time){
     return returnList;
 }
 
+void removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient){
+    //Finds the node in the tree associated to the time provided, and within the node deletes the
+    //specified ingredient, if no ingredients are left afterwards then the node is deleted.
+    //Frees from memory the string in the node
+
+    int breaker = 0;
+    warehouseTreeNode *node = *d_root;
+    while(breaker == 0){
+        if(node->expiration == time){
+            breaker = 1;
+        }
+        else if(node->expiration > time){
+            node = node->left;
+        }
+        else if(node->expiration < time){
+            node = node->right;
+        }
+    }
+
+    StringList *ingredients = node->ingredients;
+    if(strcmp(ingredients->el, ingredient) == 0 && ingredients->next == NULL){
+        //If the ingredient is the only ingredient in the node
+        free(ingredients);
+        deleteNodeFromTree(d_root, node);
+    }
+    else{
+        while(strcmp(ingredients->next->el, ingredient) != 0){
+            ingredients = ingredients->next;
+        }
+
+        StringList *ingredientFound = ingredients->next;
+        ingredients->next = ingredientFound->next;
+        free(ingredientFound);
+    }
+}
+
 void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
     //STEP 1: perform simple deletion
 
