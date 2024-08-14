@@ -644,6 +644,7 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
     }
 
     //Clean List
+    hashHead->totalAmount -= ingredientHead->el->amount;
     if(prevIngredientHead != NULL){
         prevIngredientHead->next = ingredientHead->next;
     }
