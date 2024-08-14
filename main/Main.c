@@ -123,7 +123,7 @@ typedef struct Courier                          Courier;
 int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
 int             resupply(warehouseMap *map, warehouseTreeNode **root);
-int             order();
+int             order(warehouseMap *map, warehouseTreeNode **root, int time);
 int             loadCurrier();
 
 //RECIPIES
@@ -154,6 +154,10 @@ void            removeIngredientFromMapByTime(warehouseMap *map, int time, Strin
 void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
 void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient);
 int             removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity);
+
+//ORDERS
+int             readOrder(orderedItem *item, int time);
+void            printOrder(orderedItem *item);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -241,6 +245,11 @@ int main(){
 
                 //debug
                 printRBTree(*root, 0);
+            }
+            else if(strcmp("ordine", command) == 0){
+                warehouseMap *map = &whMap;
+
+                order(map, root, time);
             }
         }
 
@@ -1119,6 +1128,24 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
 
 
 
+//ORDER HANDLING
+int order(warehouseMap *map, warehouseTreeNode **root, int time){
+    int ch;
+
+    orderedItem *item = malloc(sizeof(*item));
+    ch = readOrder(item, time);
+
+    //debug print
+    printOrder(item);
+
+
+    return ch;
+}
+
+
+
+
+
 
 //PARSING FUNCTIONS
 int readRecipie(recipie *r){
@@ -1241,6 +1268,38 @@ int readSupplies(ingredientLotList *s){
     return ch;
 }
 
+int readOrder(orderedItem *item, int time){
+    int ch = 0;
+    int i;
+
+    while(ch != '\n' && ch != EOF){
+
+        //READ RECIPIE NAME
+        i = 0;
+        while((ch = fgetc(stdin)) != ' '){
+            item->name[i] = ch;
+            i++;
+        }
+        item->name[i] = '\0';
+
+
+        //READ AMOUNT ORDERED
+        i = 0;
+        String amount;
+        while((ch = fgetc(stdin)) != '\n'){
+            amount[i] = ch;
+            i++;
+        }
+        amount[i] = '\0';
+        item->amount = atoi(amount);
+
+
+        //ADD INGREDIENT TIME
+        item->time = time;
+    }
+    return ch;
+}
+
 
 
 
@@ -1304,6 +1363,12 @@ void printRBTree(warehouseTreeNode *node, int level) {
 
     // Print the left subtree
     printRBTree(node->left, level + 1);
+}
+
+void printOrder(orderedItem *item){
+    printf("Ordered item: %s\n", item->name);
+    printf("Amount: %d\n", item->amount);
+    printf("Time of order: %d\n", item->time);
 }
 
 
