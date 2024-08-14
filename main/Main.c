@@ -558,7 +558,6 @@ int removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMa
     ingredientList *currentIngredientNode = firstIngredientNode;
     ingredient *ingredient;
 
-    int amount;
     int hash;
 
     ingredientLotListList *hashHead;
@@ -740,7 +739,8 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
     while(ingredientHead->el->time != time){
         prevIngredientHead = ingredientHead;
         ingredientHead = ingredientHead->next;
-    }    
+    }
+    removeNodeFromIngredientMap(map, hash, hashHead, prevHashHead, ingredientHead, prevIngredientHead);
 }
 
 void removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead){
