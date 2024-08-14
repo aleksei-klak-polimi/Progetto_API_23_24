@@ -641,9 +641,10 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
     while(ingredientHead->el->time != time){
         prevIngredientHead = ingredientHead;
         ingredientHead = ingredientHead->next;
-    }
+    }    
+}
 
-    //Clean List
+void removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead){
     hashHead->totalAmount -= ingredientHead->el->amount;
     if(prevIngredientHead != NULL){
         prevIngredientHead->next = ingredientHead->next;
@@ -664,7 +665,6 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
     }
     free(ingredientHead->el);
     free(ingredientHead);
-
 }
 
 void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
