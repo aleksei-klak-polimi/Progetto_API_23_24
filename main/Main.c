@@ -63,6 +63,12 @@ struct numberedTimedItemList{
     struct numberedTimedItemList    *next;
 };
 
+struct numberedTimedItemQueue{
+    String                              ingredient;
+    struct numberedTimedItemList        *head;
+    struct numberedTimedItemList        *tail;
+};
+
 struct numberedTimedItemListList{
     int                                 totalAmount;
     struct numberedTimedItemList        *el;
@@ -70,8 +76,19 @@ struct numberedTimedItemListList{
 };
 
 
+struct numberedTimedItemQueueList{
+    struct numberedTimedItemQueue       *el;
+    struct numberedTimedItemQueueList   *next;
+};
+
+
 struct numberedTimedItemListMap{
     struct numberedTimedItemListList *hashArray[HASHMAPSIZE];
+};
+
+
+struct numberedTimedItemQueueMap{
+    struct numberedTimedItemQueueList *hashArray[HASHMAPSIZE];
 };
 
 
@@ -105,6 +122,9 @@ typedef struct namedNumberedItemListListMap     recipiesMap;
 
 typedef struct numberedTimedItem                orderedItem;
 typedef struct numberedTimedItemList            orderedItemList;
+typedef struct numberedTimedItemQueue           orderedItemQueue;
+typedef struct numberedTimedItemQueueList       orderedItemQueueList;
+typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
 
 typedef struct numberedTimedItem                ingredientLot;
 typedef struct numberedTimedItemList            ingredientLotList;
@@ -1135,8 +1155,7 @@ int order(warehouseMap *map, warehouseTreeNode **root, int time){
     orderedItem *item = malloc(sizeof(*item));
     ch = readOrder(item, time);
 
-    //debug print
-    printOrder(item);
+    
 
 
     return ch;
