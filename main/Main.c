@@ -153,7 +153,7 @@ void            addIngredientToMap(warehouseMap *map, ingredientLot*s);
 void            removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient);
 void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
 void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient);
-int             removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMap *map, recipie *recipie);
+int             removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -549,7 +549,7 @@ void removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap
     }
 }
 
-int removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMap *map, recipie *recipie){
+int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity){
     //Returns 0 if there were less ingredients available than specified amount and nothing is deleted
     //Returns 1 if the ingredients were successfully removed
 
@@ -572,7 +572,7 @@ int removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMa
         int breaker = 0;
         while(breaker == 0){
             if(strcmp(hashHead->el->el->name, ingredient->name)){
-                if(hashHead->totalAmount < ingredient->amount){
+                if(hashHead->totalAmount < (ingredient->amount *quantity)){
                     return 0;
                 }
                 else{
@@ -592,7 +592,7 @@ int removeIngredientFromWarehouseByRecipie(warehouseTreeNode **root, warehouseMa
 
 
     currentIngredientNode = firstIngredientNode;
-    int totalAmount = currentIngredientNode->el->amount;
+    int totalAmount = currentIngredientNode->el->amount *quantity;
 
     ingredientLotListList *prevHashHead = NULL;
     ingredientLotList *ingredientHead;
