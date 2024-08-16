@@ -197,9 +197,9 @@ int main(){
     recipiesMap         cookBook;
     warehouseMap        whMap;
 
-    orderedItemQueueMap *ordersByIngredientsMap;
-    orderedItemQueue    *ordersReady;
-    orderedItemQueue    *ordersPending;
+    orderedItemQueueMap *ordersByIngredientsMap = malloc(sizeof(*ordersByIngredientsMap));
+    orderedItemQueue    *ordersReady = malloc(sizeof(*ordersReady));
+    orderedItemQueue    *ordersPending = malloc(sizeof(*ordersPending));
 
     warehouseTreeNode   *whTree = NULL;
     Courier             courier;
@@ -207,9 +207,15 @@ int main(){
     //initialize the cookBook to have all entries NULL.
     for(i = 0; i < HASHMAPSIZE; i++){
         cookBook.hashArray[i] = NULL;
+        whMap.hashArray[i] = NULL;
+        ordersByIngredientsMap->hashArray[i] = NULL;
     }
-    //todo finish initializing other structures
+    ordersReady->head = NULL;
+    ordersReady->tail = NULL;
     
+    ordersPending->head = NULL;
+    ordersPending->tail = NULL;
+    //todo finish initializing other structures
 
 
     //main while loop
