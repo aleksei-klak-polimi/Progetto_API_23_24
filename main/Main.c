@@ -180,6 +180,7 @@ int             removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, 
 int             readOrder(orderedItem *item, int time);
 void            printOrder(orderedItem *item);
 void            addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
+void            removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -238,7 +239,7 @@ int main(){
 
             //CHECK IF COURIER TIME
             if(time % courier.frequency == 0){
-                
+                //todo
             }
 
 
@@ -1313,6 +1314,88 @@ void addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIng
     }
 }
 
+void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead){
+    int hash;
+
+    ingredientList *ingredientNode = ingredientsHead;
+    orderedItemQueueList *hashHead, *prevHashHead;
+    orderedItemQueue *ordersQueue;
+    orderedItemList *orderNode, *prevOrderNode;
+
+    while(ingredientNode != NULL){
+        hash = sdbm_hash(ingredientNode->el->name);
+
+        hashHead = ordersByIngredient->hashArray[hash];
+        prevHashHead = NULL;
+
+        while(hashHead != NULL){
+            ordersQueue = hashHead->el;
+
+            if(strcmp(ordersQueue->ingredient, ingredientNode->el->name) == 0 ){
+                // Correct queue located
+                orderNode = ordersQueue->head;
+                prevOrderNode = NULL;
+
+                int breaker = 0;
+                while(orderNode != NULL && breaker == 0){
+                    if(orderNode->el->amount == item->amount && orderNode->el->time == item->time){
+                        //todo check if possible to compare directly item and node, if they point to same memory address
+
+                        // Order found, remove it from the queue
+                        if(prevOrderNode == NULL){
+                            //Removing the head of the queue
+                            ordersQueue->head = orderNode->next;
+                        }
+                        else{
+                            prevOrderNode->next = orderNode->next;
+                        }
+
+                        if(orderNode == ordersQueue->tail){
+                            // If it's the tail, update the tail pointer
+                            ordersQueue->tail = prevOrderNode;
+                        }
+
+                        free(orderNode);
+                        breaker = 1;
+                    }
+
+                    prevOrderNode = orderNode;
+                    orderNode = orderNode->next;
+                }
+
+                // Check if the queue is empty after removal
+                if(ordersQueue->head == NULL){
+                    // If queue is empty, remove the queue itself
+                    free(ordersQueue);
+
+                    if(prevHashHead == NULL){
+                        // Remove the head of the hash list
+                        ordersByIngredient->hashArray[hash] = hashHead->next;
+                    } else {
+                        prevHashHead->next = hashHead->next;
+                    }
+
+                    free(hashHead);
+
+                    // If the hashArray slot is empty, set it to NULL
+                    if(ordersByIngredient->hashArray[hash] == NULL){
+                        break;
+                    }
+                }
+
+                // Exit the loop after processing the correct queue
+                break;
+            }
+
+            // Move to the next hashHead in the list
+            prevHashHead = hashHead;
+            hashHead = hashHead->next;
+        }
+
+         // Move to the next ingredient in the list
+        ingredientNode = ingredientNode->next;
+    }
+}
 
 
 
