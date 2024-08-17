@@ -56,6 +56,7 @@ struct numberedTimedItem{
     String  name;
     int     amount;
     int     time;
+    int     totalWeigth;
 };
 
 
@@ -107,7 +108,7 @@ struct numberedTimedItemListTree{
 struct Courier{
     int                             frequency;
     int                             capacity;
-    struct numberedTimedItemList    ordersHead;
+    struct numberedTimedItemList    *ordersHead;
 };
 
 
@@ -145,7 +146,7 @@ int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
 int             resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
-int             loadCurrier();
+void            loadCourier();
 
 //RECIPIES
 unsigned int    sdbm_hash(String string);
@@ -304,21 +305,6 @@ int main(){
 
 
 
-int setupCourier(Courier *c){
-    String input;
-    int ch;
-    int i = 0;
-
-    while((ch = fgetc(stdin)) != '\n' && ch != EOF){
-        input[i] = ch;
-        i++;
-    }
-    input[i] = '\0';
-
-    sscanf(input, "%d %d", &c->frequency, &c-> capacity);
-
-    return ch;
-}
 
 int addRecipie(recipiesMap *book){
     int ch;
@@ -1268,7 +1254,15 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
         free(item);
     }
     else{
+        //Calcuate order weigth
+        ingredientList *ingredientNode = recipie->head;
+        int weigth;
+        while(ingredientNode != NULL){
+            weigth += ingredientNode->el->amount;
+        }
+        item->totalWeigth = weigth * item->amount;
 
+        //Handle the rest of the order procedures
         orderedItemList *orderNode = malloc(sizeof(*orderNode));
         orderNode->el = item;
         orderNode->next = NULL;
@@ -1516,6 +1510,75 @@ void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
             else{
                 prev->next = newNode;
                 newNode->next = current;
+            }
+        }
+    }
+}
+
+
+
+
+
+//COURIER FUNCTIONS
+int setupCourier(Courier *c){
+    String input;
+    int ch;
+    int i = 0;
+
+    while((ch = fgetc(stdin)) != '\n' && ch != EOF){
+        input[i] = ch;
+        i++;
+    }
+    input[i] = '\0';
+
+    sscanf(input, "%d %d", &c->frequency, &c-> capacity);
+
+    return ch;
+}
+
+void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady){
+    int currentCourierLoad = 0;
+
+    orderedItemList *orderNode = ordersReady->head;
+
+    int breaker = 0;
+    while(breaker == 0){
+        //Check if enough space in Courier
+        if(currentCourierLoad + orderNode->el->totalWeigth < courier->capacity){
+            //order fits in the courier
+            //Load orders sorted by weight descending then by time ascending
+
+            //todo remove order from queue and remove utilization from cookbook
+            ordersReady->head = ordersReady->head->next;
+
+            currentCourierLoad += orderNode->el->totalWeigth;
+            if(courier->ordersHead == NULL || courier->ordersHead->el->totalWeigth < orderNode->el->totalWeigth || (courier->ordersHead->el->totalWeigth == orderNode->el->totalWeigth && courier->ordersHead->el->time > orderNode->el->time)){
+                //if no orders are in courier OR first order weighs less than the current order OR they weigh the same but
+                //the current order is fresher then replace the head with the current order
+                orderNode->next = courier->ordersHead;
+                courier->ordersHead = orderNode;
+            }
+            else{
+                orderedItemList *prev = NULL;
+                orderedItemList *current = courier->ordersHead;
+
+                int breaker = 0;
+                while(breaker == 0){
+                    if(current->el->totalWeigth < orderNode->el->totalWeigth || (current->el->totalWeigth == orderNode->el->totalWeigth && current->el->time > orderNode->el->time)){
+                        breaker = 1;
+                        orderNode->next = current;
+                        prev->next = orderNode;
+                    }
+                    else if(current->next == NULL){
+                        breaker = 1;
+                        current->next = orderNode;
+                        orderNode->next = NULL;
+                    }
+                    else{
+                        prev = current;
+                        current = current->next;
+                    }
+                }
             }
         }
     }
