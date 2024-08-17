@@ -182,6 +182,9 @@ void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady
 
 //COURIER
 int             setupCourier(Courier *c);
+void            loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady);
+void            printCourierContents(Courier *courier);
+void            clearCourierOrdersMemory(Courier *courier);
 
 //DEBUG PRINTS
 void            printSupplies(ingredientLotList *s);
@@ -1582,6 +1585,41 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
             }
         }
     }
+}
+
+void printCourierContents(Courier *courier){
+    orderedItemList *currentOrder = courier->ordersHead;
+
+    if(courier->ordersHead == NULL){
+        printf("camioncino vuoto\n");
+    }
+    else{
+        while (currentOrder != NULL) {
+            printf("%d %s %d\n", currentOrder->el->time, currentOrder->el->name, currentOrder->el->amount);
+            currentOrder = currentOrder->next;
+        }
+    }
+}
+
+void clearCourierOrdersMemory(Courier *courier){
+    orderedItemList *current = courier->ordersHead;
+    orderedItemList *prev = current;
+
+    int breaker = 0;
+    while(breaker == 0){
+        free(prev->el);
+        free(prev);
+
+        if(current == NULL){
+            breaker = 1;
+        }
+        else{
+            prev = current;
+            current = current->next;
+        }
+    }
+
+    courier->ordersHead = NULL;
 }
 
 
