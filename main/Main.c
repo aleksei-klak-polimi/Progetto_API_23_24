@@ -143,7 +143,7 @@ typedef struct Courier                          Courier;
 //INSTRUCTIONS
 int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
-int             resupply(warehouseMap *map, warehouseTreeNode **root);
+int             resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
 int             loadCurrier();
 
@@ -181,6 +181,8 @@ int             readOrder(orderedItem *item, int time);
 void            printOrder(orderedItem *item);
 void            addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 void            removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
+void            removeOrderFromPending(orderedItem *item, orderedItemQueue *ordersWaiting);
+void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);
 
 //COURIER
 int             setupCourier(Courier *c);
@@ -275,8 +277,9 @@ int main(){
             }
             else if(strcmp("rifornimento", command) == 0){
                 warehouseMap *map =         &whMap;
+                recipiesMap *book = &cookBook;
 
-                resupply(map, root);
+                resupply(map, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
 
                 //debug
                 printRBTree(*root, 0);
@@ -469,7 +472,7 @@ recipie *retrieveRecipie(recipiesMap *book, String name){
     return NULL;
 }
 
-int resupply(warehouseMap *map, warehouseTreeNode **root){
+int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady){
     int ch;
 
     ingredientLotList *lot;
@@ -483,6 +486,59 @@ int resupply(warehouseMap *map, warehouseTreeNode **root){
         addIngredientToMap(map, navigator->el);
         navigator = navigator->next;
     }
+
+    //For each ingredient added with resupply try to fulfill pending orders from Ingredient map
+    navigator = lot;
+    int hash;
+    orderedItemQueueList *hashHead;
+    orderedItemList *orderList = NULL;
+    orderedItemList *nextOrderNode = NULL;
+    recipie *recipie;
+
+    while(navigator != NULL){
+        hash = sdbm_hash(navigator->el->name);
+
+        hashHead = ordersByIngredient->hashArray[hash];
+
+        int breaker = 0;
+        while(breaker == 0){
+            if(strcmp(hashHead->el->ingredient, navigator->el->name) == 0){
+                breaker = 1;
+                orderList = hashHead->el->head;
+            }
+            else{
+                if(hashHead->next != NULL){
+                    hashHead = hashHead->next;
+                }
+                else{
+                    breaker = 1;
+                }
+            }
+        }
+
+        while(orderList != NULL){
+            //Try to fulfill each order
+            recipie = retrieveRecipie(book, orderList->el->name);
+
+            if(removeIngredientsFromWarehouseByOrder(root, map, recipie, orderList->el->amount) == 1){
+                //Order was fulfilled, remove from pending and add to ready
+                removeOrderFromPending(orderList->el, ordersPending);
+                addOrderToReady(orderList->el, ordersReady);
+            }
+
+
+            orderList = nextOrderNode;
+            nextOrderNode = orderList->next;
+        }
+        orderList = NULL;
+        nextOrderNode = NULL;
+
+
+        navigator = navigator->next;
+    }
+
+
+
 
     //Clean the list used to store the lots that were read
     ingredientLotList *curr = lot;
@@ -1394,6 +1450,73 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
 
          // Move to the next ingredient in the list
         ingredientNode = ingredientNode->next;
+    }
+}
+
+void removeOrderFromPending(orderedItem *item, orderedItemQueue *ordersWaiting){
+    orderedItemList *current = ordersWaiting->head;
+    orderedItemList *prev = NULL;
+
+    int breaker = 0;
+    orderedItem *storedItem;
+    while(breaker == 0){
+        storedItem = current->el;
+        if(strcmp(storedItem->name, item->name) == 0 && storedItem->amount == item->amount && storedItem->time == item->time){
+            //Item found
+            breaker = 1;
+            if(prev == NULL){
+                ordersWaiting->head = current->next;
+            }
+            else{
+                prev->next = current->next;
+            }
+
+            free(current);
+        }
+        else{
+            if(current->next == NULL){
+                breaker = 1;
+            }
+            else{
+                prev = current;
+                current = current->next;
+            }
+        }
+    }
+}
+
+void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
+    orderedItemList *current = ordersReady->head;
+    orderedItemList *prev = NULL;
+
+    orderedItemList *newNode = malloc(sizeof(*newNode));
+    newNode->el = item;
+
+    int breaker = 0;
+    while(breaker == 0){
+        if(current->el->time <= item->time){
+            if(current->next != NULL){
+                prev = current;
+                current = current->next;
+            }
+            else{
+                breaker = 1;
+                ordersReady->tail = newNode;
+                current->next = newNode;
+                newNode->next = NULL;
+            }
+        }
+        else{
+            breaker = 1;
+            if(prev == NULL){
+                ordersReady->head = newNode;
+                newNode->next = current;
+            }
+            else{
+                prev->next = newNode;
+                newNode->next = current;
+            }
+        }
     }
 }
 
