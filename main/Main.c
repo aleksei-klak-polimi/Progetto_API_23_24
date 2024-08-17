@@ -151,10 +151,8 @@ int             loadCurrier();
 unsigned int    sdbm_hash(String string);
 void            insertRecipie(recipiesMap *book, recipie *recipie);
 int             readRecipie(recipie *r);
-void            printRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
 recipie         *retrieveRecipie(recipiesMap *book, String name);
-void            printRecipieBook(recipiesMap *book);
 
 //SUPPLIES
 void            updateInventory(warehouseMap *map, warehouseTreeNode *root);
@@ -167,9 +165,6 @@ void            rebalanceTreeAfterInsertion(warehouseTreeNode **root, warehouseT
 void            leftRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 void            rightRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 int             readSupplies(ingredientLotList *s);
-void            printSupplies(ingredientLotList *s);
-void            printRBTree(warehouseTreeNode *node, int level);
-void            printSpaces(int count);
 void            addIngredientToMap(warehouseMap *map, ingredientLot*s);
 void            removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient);
 void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
@@ -187,6 +182,12 @@ void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady
 //COURIER
 int             setupCourier(Courier *c);
 
+//DEBUG PRINTS
+void            printSupplies(ingredientLotList *s);
+void            printRBTree(warehouseTreeNode *node, int level);
+void            printSpaces(int count);
+void            printRecipie(recipie *r);
+void            printRecipieBook(recipiesMap *book);
 
 
 
