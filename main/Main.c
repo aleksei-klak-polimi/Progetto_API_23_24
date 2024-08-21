@@ -153,6 +153,7 @@ unsigned int    sdbm_hash(String string);
 void            insertRecipie(recipiesMap *book, recipie *recipie);
 int             readRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
+void            decrementRecipieUtilization(recipiesMap *book, String name);
 recipie         *retrieveRecipie(recipiesMap *book, String name);
 
 //SUPPLIES
@@ -310,6 +311,9 @@ int main(){
 
 
 int addRecipie(recipiesMap *book){
+    //calls function to read recipie from input buffer
+    //then calls function to add recipie to recipie book
+    //malloc for recipie.
     int ch;
     recipie *r = malloc(sizeof(*r));
     ch = readRecipie(r);
@@ -319,6 +323,9 @@ int addRecipie(recipiesMap *book){
 }
 
 void insertRecipie(recipiesMap *book, recipie *recipie){
+    //Inserts given recipie into recipie book
+    //malloc recipiesList
+
     int hash = sdbm_hash(recipie->name);
     int duplicate = 0;
 
@@ -460,6 +467,21 @@ recipie *retrieveRecipie(recipiesMap *book, String name){
     }
 
     return NULL;
+}
+
+void decrementRecipieUtilization(recipiesMap *book, String name){
+    int hash = sdbm_hash(name);
+    recipiesList *hashHead = book->hashArray[hash];
+
+    while(hashHead != NULL){
+        if(strcmp(hashHead->el->name, name) == 0){
+            hashHead->ordersPending--;
+            break;
+        }
+        else{
+            hashHead = hashHead->next;
+        }
+    }
 }
 
 int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady){
@@ -1551,10 +1573,14 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
             //order fits in the courier
             //Load orders sorted by weight descending then by time ascending
 
-            //todo remove order from queue and remove utilization from cookbook
             ordersReady->head = ordersReady->head->next;
 
             currentCourierLoad += orderNode->el->totalWeigth;
+
+            //removing utilization from recipie book
+            decrementRecipieUtilization(book, orderNode->el->name);
+
+
             if(courier->ordersHead == NULL || courier->ordersHead->el->totalWeigth < orderNode->el->totalWeigth || (courier->ordersHead->el->totalWeigth == orderNode->el->totalWeigth && courier->ordersHead->el->time > orderNode->el->time)){
                 //if no orders are in courier OR first order weighs less than the current order OR they weigh the same but
                 //the current order is fresher then replace the head with the current order
