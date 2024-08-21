@@ -146,7 +146,7 @@ int             addRecipie(recipiesMap *book);
 int             removeRecipie(recipiesMap *book);
 int             resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
-void            loadCourier();
+void            loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady);
 
 //RECIPIES
 unsigned int    sdbm_hash(String string);
