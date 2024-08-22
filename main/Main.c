@@ -238,63 +238,61 @@ int main(){
             //Set up courier
             ch = setupCourier(courier);
         }
-        else{
-            //Remove expired ingredients
-            removeNodeFromTreeByTime(root, time);
+        
+        //Remove expired ingredients
+        removeNodeFromTreeByTime(root, time);
 
-            //debug print
-            //printRBTree(*root, 0);
-
-
-            //CHECK IF COURIER TIME
-            if(time % courier->frequency == 0){
-                loadCourier(courier, book, ordersReady);
-                printCourierContents(courier);
-                clearCourierOrdersMemory(courier);
-            }
+        //debug print
+        //printRBTree(*root, 0);
 
 
-
-
-
-            //RESET ANY PREVIOUS COMMAND
-            for(i = 0; i < STRINGSIZE; i++){
-                command[i] = '\0';
-            }
-
-            //READ NEW COMMAND
-            i = 0;
-            while((ch = fgetc(stdin)) != ' ' && ch != EOF && ch != '\n'){
-                command[i] = ch;
-                i++;
-            }
-            command[i] = '\0';
-
-            //INTERPRET THE COMMAND
-            if(strcmp("aggiungi_ricetta", command) == 0){
-                addRecipie(book);
-
-                //debug
-                //printRecipieBook(book);
-            }
-            else if(strcmp("rimuovi_ricetta", command) == 0){
-                removeRecipie(book);
-
-                //debug
-                //printRecipieBook(book);
-            }
-            else if(strcmp("rifornimento", command) == 0){
-                resupply(whMap, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
-
-                //debug
-                //printRBTree(*root, 0);
-            }
-            else if(strcmp("ordine", command) == 0){
-                order(whMap, root, book, ordersReady, ordersPending, ordersByIngredientsMap, time);
-            }
+        //CHECK IF COURIER TIME
+        if(time % courier->frequency == 0){
+            loadCourier(courier, book, ordersReady);
+            printCourierContents(courier);
+            clearCourierOrdersMemory(courier);
         }
 
 
+
+
+
+        //RESET ANY PREVIOUS COMMAND
+        for(i = 0; i < STRINGSIZE; i++){
+            command[i] = '\0';
+        }
+
+        //READ NEW COMMAND
+        i = 0;
+        while((ch = fgetc(stdin)) != ' ' && ch != EOF && ch != '\n'){
+            command[i] = ch;
+            i++;
+        }
+        command[i] = '\0';
+
+        //INTERPRET THE COMMAND
+        if(strcmp("aggiungi_ricetta", command) == 0){
+            addRecipie(book);
+
+            //debug
+            //printRecipieBook(book);
+        }
+        else if(strcmp("rimuovi_ricetta", command) == 0){
+            removeRecipie(book);
+
+            //debug
+            //printRecipieBook(book);
+        }
+        else if(strcmp("rifornimento", command) == 0){
+            resupply(whMap, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
+
+            //debug
+            //printRBTree(*root, 0);
+        }
+        else if(strcmp("ordine", command) == 0){
+            order(whMap, root, book, ordersReady, ordersPending, ordersByIngredientsMap, time);
+        }
+        
         time++;
     }
 
