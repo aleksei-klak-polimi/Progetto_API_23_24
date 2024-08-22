@@ -210,7 +210,8 @@ int main(){
     orderedItemQueue    *ordersReady = malloc(sizeof(*ordersReady));
     orderedItemQueue    *ordersPending = malloc(sizeof(*ordersPending));
 
-    warehouseTreeNode   **root = NULL;
+    warehouseTreeNode   *rootNode = NULL;
+    warehouseTreeNode   **root = &rootNode;
     Courier             *courier = malloc(sizeof(*courier));
 
     //initialize the cookBook to have all entries NULL.
