@@ -745,7 +745,7 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
             if(hashHead == NULL){
                 return 0;
             }
-            if(strcmp(hashHead->el->el->name, ingredient->name)){
+            if(strcmp(hashHead->el->el->name, ingredient->name) == 0){
                 if(hashHead->totalAmount < (ingredient->amount *quantity)){
                     return 0;
                 }
@@ -776,16 +776,17 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
         //Locate the hashHead
         hash = sdbm_hash(currentIngredientNode->el->name);
         hashHead = map->hashArray[hash];
+        ingredient = currentIngredientNode->el;
 
         int breaker = 0;
         while(breaker == 0){
-            if(strcmp(hashHead->el->el->name, ingredient->name)){
+            if(strcmp(hashHead->el->el->name, ingredient->name) == 0){
                 breaker = 1;
             }
             else{
-                prevHashHead = hashHead;
-                hashHead = hashHead->next;
-            }
+                    prevHashHead = hashHead;
+                    hashHead = hashHead->next;
+                }
         }
         //HashHead located
         ingredientHead = hashHead->el;
@@ -1204,6 +1205,8 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
 
         ingredientHead->el = s;
         ingredientHead->next = NULL;
+
+        map->hashArray[hash] = hashHead;
     }
     else{
         //The hashHead already existed, locate ingredientHead
@@ -1602,10 +1605,11 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
     if(ordersReady->head != NULL){
         int currentCourierLoad = 0;
 
-        orderedItemList *orderNode = ordersReady->head;
+        orderedItemList *orderNode;
 
         int breaker = 0;
         while(breaker == 0){
+            orderNode = ordersReady->head;
             //Check if enough space in Courier
             if(currentCourierLoad + orderNode->el->totalWeigth < courier->capacity){
                 //order fits in the courier
@@ -1647,6 +1651,14 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
                         }
                     }
                 }
+
+                if(ordersReady->head == NULL){
+                    breaker = 1;
+                }
+            }
+            else{
+                //order does not fit in the courier, stop loading
+                breaker = 1;
             }
         }
     }
@@ -1671,8 +1683,8 @@ void clearCourierOrdersMemory(Courier *courier){
         return;
     }
 
-    orderedItemList *current = courier->ordersHead;
-    orderedItemList *prev = current;
+    orderedItemList *current = courier->ordersHead->next;
+    orderedItemList *prev = courier->ordersHead;
 
     int breaker = 0;
     while(breaker == 0){
