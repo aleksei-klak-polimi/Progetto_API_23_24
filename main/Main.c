@@ -513,18 +513,20 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
 
         hashHead = ordersByIngredient->hashArray[hash];
 
-        int breaker = 0;
-        while(breaker == 0){
-            if(strcmp(hashHead->el->ingredient, navigator->el->name) == 0){
-                breaker = 1;
-                orderList = hashHead->el->head;
-            }
-            else{
-                if(hashHead->next != NULL){
-                    hashHead = hashHead->next;
+        if(hashHead != NULL){
+            int breaker = 0;
+            while(breaker == 0){
+                if(strcmp(hashHead->el->ingredient, navigator->el->name) == 0){
+                    breaker = 1;
+                    orderList = hashHead->el->head;
                 }
                 else{
-                    breaker = 1;
+                    if(hashHead->next != NULL){
+                        hashHead = hashHead->next;
+                    }
+                    else{
+                        breaker = 1;
+                    }
                 }
             }
         }
