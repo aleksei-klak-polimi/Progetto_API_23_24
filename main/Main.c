@@ -385,6 +385,8 @@ int removeRecipie(recipiesMap *book){
 
     hash = sdbm_hash(name);
 
+
+
     //CHECK IF MAP CONTAINS HASH
     if(book->hashArray[hash] == NULL){
         //todo check if printf is good for stdout
@@ -400,7 +402,7 @@ int removeRecipie(recipiesMap *book){
         //CHECK IF THE HEAD OF THE LIST IS THE MATCH
         if(strcmp(book->hashArray[hash]->el->name, name) == 0){
             found = 1;
-            if(book->hashArray[hash]->ordersPending != 0){
+            if(book->hashArray[hash]->ordersPending == 0){
                 allowed = 1;
                 target = book->hashArray[hash];
 
@@ -413,11 +415,12 @@ int removeRecipie(recipiesMap *book){
             
             //To keep the list linked, we iterate through the list using prev and see if prev->next is the match
             //this way we can link together the remainder of the list after we cut out prev->next
-
-            while(prev->next != NULL){
+            int breaker = 0;
+            while(breaker == 0){
                 if(strcmp(prev->next->el->name, name) == 0){
                     found = 1;
-                    if(book->hashArray[hash]->ordersPending != 0){
+                    breaker = 1;
+                    if(book->hashArray[hash]->ordersPending == 0){
                         allowed = 1;
                         target = prev->next;
 
@@ -444,7 +447,10 @@ int removeRecipie(recipiesMap *book){
         }
         else if(found == 1 && allowed == 0){
             //the recipie was found but is in use by pending orders
-            printf("non presente\n");
+            printf("ordini in sospeso\n");
+        }
+        else{
+            printf("Conditions not met");
         }
     }
 
@@ -477,6 +483,21 @@ void decrementRecipieUtilization(recipiesMap *book, String name){
     while(hashHead != NULL){
         if(strcmp(hashHead->el->name, name) == 0){
             hashHead->ordersPending--;
+            break;
+        }
+        else{
+            hashHead = hashHead->next;
+        }
+    }
+}
+
+void incrementRecipieUtilization(recipiesMap *book, String name){
+    int hash = sdbm_hash(name);
+    recipiesList *hashHead = book->hashArray[hash];
+
+    while(hashHead != NULL){
+        if(strcmp(hashHead->el->name, name) == 0){
+            hashHead->ordersPending++;
             break;
         }
         else{
@@ -719,6 +740,9 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
 
         int breaker = 0;
         while(breaker == 0){
+            if(hashHead == NULL){
+                return 0;
+            }
             if(strcmp(hashHead->el->el->name, ingredient->name)){
                 if(hashHead->totalAmount < (ingredient->amount *quantity)){
                     return 0;
@@ -1282,11 +1306,15 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
         free(item);
     }
     else{
+        //mark recipie ad "orders relying on recipie"
+        incrementRecipieUtilization(book, recipie->name);
+
         //Calcuate order weigth
         ingredientList *ingredientNode = recipie->head;
         int weigth;
         while(ingredientNode != NULL){
             weigth += ingredientNode->el->amount;
+            ingredientNode = ingredientNode->next;
         }
         item->totalWeigth = weigth * item->amount;
 
@@ -1318,6 +1346,8 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
 
             addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
         }
+
+        printf("accettato\n");
     }
 
     return ch;
@@ -1390,6 +1420,8 @@ void addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIng
                 }
             }
         }
+
+        ingredientNode = ingredientNode->next;
     }
 }
 
