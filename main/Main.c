@@ -331,6 +331,8 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
         head->ordersPending = 0;
 
         book->hashArray[hash] = head;
+
+        printf("aggiunta\n");
     }
     else{
         recipiesList *node = book->hashArray[hash];
@@ -359,6 +361,11 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
             newNode->ordersPending = 0;
 
             node->next = newNode;
+
+            printf("aggiunta\n");
+        }
+        else{
+            printf("ignorato\n");
         }
     }
 }
