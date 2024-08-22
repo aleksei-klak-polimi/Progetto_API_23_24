@@ -203,20 +203,20 @@ int main(){
     int i = 0;
     String command;
 
-    recipiesMap         cookBook;
-    warehouseMap        whMap;
+    recipiesMap         *book = malloc(sizeof(*book));
+    warehouseMap        *whMap = malloc(sizeof(*whMap));
 
     orderedItemQueueMap *ordersByIngredientsMap = malloc(sizeof(*ordersByIngredientsMap));
     orderedItemQueue    *ordersReady = malloc(sizeof(*ordersReady));
     orderedItemQueue    *ordersPending = malloc(sizeof(*ordersPending));
 
-    warehouseTreeNode   *whTree = NULL;
-    Courier             courier;
+    warehouseTreeNode   **root = NULL;
+    Courier             *courier = malloc(sizeof(*courier));
 
     //initialize the cookBook to have all entries NULL.
     for(i = 0; i < HASHMAPSIZE; i++){
-        cookBook.hashArray[i] = NULL;
-        whMap.hashArray[i] = NULL;
+        book->hashArray[i] = NULL;
+        whMap->hashArray[i] = NULL;
         ordersByIngredientsMap->hashArray[i] = NULL;
     }
     ordersReady->head = NULL;
@@ -224,6 +224,8 @@ int main(){
     
     ordersPending->head = NULL;
     ordersPending->tail = NULL;
+
+    courier->ordersHead = NULL;
     //todo finish initializing other structures
 
 
@@ -232,22 +234,20 @@ int main(){
 
         //SETUP COURIER
         if(time == 0){
-            Courier *courierPointer = &courier;
-    
-            ch = setupCourier(courierPointer);
-            printf("Frequency: %d\nCapacity: %d\n", courier.frequency, courier.capacity);
+            //Set up courier
+            ch = setupCourier(courier);
         }
         else{
-            warehouseTreeNode **root =   &whTree;
             //Remove expired ingredients
             removeNodeFromTreeByTime(root, time);
-            printf("\nRemoved expired:\n");
-            printRBTree(*root, 0);
+
+            //debug print
+            //printRBTree(*root, 0);
 
 
             //CHECK IF COURIER TIME
-            if(time % courier.frequency == 0){
-                //todo
+            if(time % courier->frequency == 0){
+                loadCourier(courier, book, ordersReady);
             }
 
 
@@ -258,6 +258,7 @@ int main(){
             for(i = 0; i < STRINGSIZE; i++){
                 command[i] = '\0';
             }
+
             //READ NEW COMMAND
             i = 0;
             while((ch = fgetc(stdin)) != ' ' && ch != EOF && ch != '\n'){
@@ -268,33 +269,25 @@ int main(){
 
             //INTERPRET THE COMMAND
             if(strcmp("aggiungi_ricetta", command) == 0){
-                recipiesMap *book = &cookBook;
                 addRecipie(book);
 
                 //debug
-                printRecipieBook(book);
+                //printRecipieBook(book);
             }
             else if(strcmp("rimuovi_ricetta", command) == 0){
-                recipiesMap *book = &cookBook;
                 removeRecipie(book);
 
                 //debug
-                printRecipieBook(book);
+                //printRecipieBook(book);
             }
             else if(strcmp("rifornimento", command) == 0){
-                warehouseMap *map =         &whMap;
-                recipiesMap *book = &cookBook;
-
-                resupply(map, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
+                resupply(whMap, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
 
                 //debug
-                printRBTree(*root, 0);
+                //printRBTree(*root, 0);
             }
             else if(strcmp("ordine", command) == 0){
-                warehouseMap *map = &whMap;
-                recipiesMap *book = &cookBook;
-
-                order(map, root, book, ordersReady, ordersPending, ordersByIngredientsMap, time);
+                order(whMap, root, book, ordersReady, ordersPending, ordersByIngredientsMap, time);
             }
         }
 
