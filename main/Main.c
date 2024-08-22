@@ -249,6 +249,8 @@ int main(){
             //CHECK IF COURIER TIME
             if(time % courier->frequency == 0){
                 loadCourier(courier, book, ordersReady);
+                printCourierContents(courier);
+                clearCourierOrdersMemory(courier);
             }
 
 
@@ -564,7 +566,9 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
 
 
             orderList = nextOrderNode;
-            nextOrderNode = orderList->next;
+            if(nextOrderNode != NULL){
+                nextOrderNode = orderList->next;
+            }
         }
         orderList = NULL;
         nextOrderNode = NULL;
@@ -1665,6 +1669,10 @@ void printCourierContents(Courier *courier){
 }
 
 void clearCourierOrdersMemory(Courier *courier){
+    if(courier->ordersHead == NULL){
+        return;
+    }
+
     orderedItemList *current = courier->ordersHead;
     orderedItemList *prev = current;
 
