@@ -235,7 +235,7 @@ int main(){
     //main while loop
     while(ch != EOF){
         //debug prints
-        printf("\n\n\nWarehouse Tree contents:\n");
+        /*printf("\n\n\nWarehouse Tree contents:\n");
         printRBTree(*root, 0);
 
         printf("\nOrders ready:\n");
@@ -244,7 +244,7 @@ int main(){
         printf("\nOrders pending:\n");
         printOrderQueue(ordersPending);
 
-        printf("\n\n\n");
+        printf("\n\n\n");*/
 
 
 
@@ -257,12 +257,8 @@ int main(){
         //Remove expired ingredients
         removeIngredientsFromWarehouseByTime(root, whMap, time);
 
-        //debug print
-        //printRBTree(*root, 0);
-
-
         //CHECK IF COURIER TIME
-        if(time % courier->frequency == 0){
+        if(time != 0 && time % courier->frequency == 0){
             loadCourier(courier, book, ordersReady);
             printCourierContents(courier);
             clearCourierOrdersMemory(courier);
@@ -542,9 +538,11 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
     orderedItemQueueList *hashHead;
     orderedItemList *orderList = NULL;
     orderedItemList *nextOrderNode = NULL;
+    orderedItem *item;
     recipie *recipie;
 
     while(navigator != NULL){
+        //Cycle all ingredients in the resupply chain
         hash = sdbm_hash(navigator->el->name);
 
         hashHead = ordersByIngredient->hashArray[hash];
@@ -552,6 +550,7 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
         if(hashHead != NULL){
             int breaker = 0;
             while(breaker == 0){
+                //Find list of orders associated with current ingredient
                 if(strcmp(hashHead->el->ingredient, navigator->el->name) == 0){
                     breaker = 1;
                     orderList = hashHead->el->head;
@@ -571,17 +570,18 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
             //Try to fulfill each order
             recipie = retrieveRecipie(book, orderList->el->name);
 
+            nextOrderNode = orderList->next;
             if(removeIngredientsFromWarehouseByOrder(root, map, recipie, orderList->el->amount) == 1){
-                //Order was fulfilled, remove from pending and add to ready
-                removeOrderFromPending(orderList->el, ordersPending);
-                addOrderToReady(orderList->el, ordersReady);
-            }
+                //Order was fulfilled, remove from pending and from map and add to orders ready
 
+                item = orderList->el;
+
+                removeOrderFromIngredientMap(item, ordersByIngredient, recipie->head);
+                removeOrderFromPending(item, ordersPending);
+                addOrderToReady(item, ordersReady);
+            }
 
             orderList = nextOrderNode;
-            if(nextOrderNode != NULL){
-                nextOrderNode = orderList->next;
-            }
         }
         orderList = NULL;
         nextOrderNode = NULL;
@@ -897,6 +897,11 @@ void removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String
         //If the ingredient is the only ingredient in the node
         free(ingredients);
         deleteNodeFromTree(d_root, node);
+    }
+    else if(strcmp(ingredients->el, ingredient) == 0){
+        //If the ingredient is the first in the node but it's not the only one
+        node->ingredients = node->ingredients->next;
+        free(ingredients);
     }
     else{
         while(strcmp(ingredients->next->el, ingredient) != 0){
@@ -1469,7 +1474,7 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
 
                 int breaker = 0;
                 while(orderNode != NULL && breaker == 0){
-                    if(orderNode->el->amount == item->amount && orderNode->el->time == item->time){
+                    if(orderNode->el == item){
                         //todo check if possible to compare directly item and node, if they point to same memory address
 
                         // Order found, remove it from the queue
