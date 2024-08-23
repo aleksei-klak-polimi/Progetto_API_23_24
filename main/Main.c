@@ -172,6 +172,7 @@ void            removeIngredientFromMapByTime(warehouseMap *map, int time, Strin
 void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
 void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient);
 int             removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity);
+void            removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap *map, int time);
 
 //ORDERS
 int             readOrder(orderedItem *item, int time);
@@ -193,6 +194,7 @@ void            printRBTree(warehouseTreeNode *node, int level);
 void            printSpaces(int count);
 void            printRecipie(recipie *r);
 void            printRecipieBook(recipiesMap *book);
+void            printOrderQueue(orderedItemQueue *queue);
 
 
 
@@ -232,6 +234,19 @@ int main(){
 
     //main while loop
     while(ch != EOF){
+        //debug prints
+        printf("\n\n\nWarehouse Tree contents:\n");
+        printRBTree(*root, 0);
+
+        printf("\nOrders ready:\n");
+        printOrderQueue(ordersReady);
+
+        printf("\nOrders pending:\n");
+        printOrderQueue(ordersPending);
+
+        printf("\n\n\n");
+
+
 
         //SETUP COURIER
         if(time == 0){
@@ -240,7 +255,7 @@ int main(){
         }
         
         //Remove expired ingredients
-        removeNodeFromTreeByTime(root, time);
+        removeIngredientsFromWarehouseByTime(root, whMap, time);
 
         //debug print
         //printRBTree(*root, 0);
@@ -1311,7 +1326,7 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
         free(item);
     }
     else{
-        //mark recipie ad "orders relying on recipie"
+        //mark recipie as "orders relying on recipie"
         incrementRecipieUtilization(book, recipie->name);
 
         //Calcuate order weigth
@@ -1554,7 +1569,14 @@ void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
 
     int breaker = 0;
     while(breaker == 0){
-        if(current->el->time <= item->time){
+        if(ordersReady->head == NULL){
+            ordersReady->head = newNode;
+            ordersReady->tail = newNode;
+            newNode->next = NULL;
+
+            breaker = 1;
+        }
+        else if(current->el->time <= item->time){
             if(current->next != NULL){
                 prev = current;
                 current = current->next;
@@ -1638,7 +1660,10 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
                         if(current->el->totalWeigth < orderNode->el->totalWeigth || (current->el->totalWeigth == orderNode->el->totalWeigth && current->el->time > orderNode->el->time)){
                             breaker = 1;
                             orderNode->next = current;
-                            prev->next = orderNode;
+
+                            if(prev != NULL){
+                                prev->next = orderNode;
+                            }
                         }
                         else if(current->next == NULL){
                             breaker = 1;
@@ -1929,6 +1954,32 @@ void printOrder(orderedItem *item){
     printf("Ordered item: %s\n", item->name);
     printf("Amount: %d\n", item->amount);
     printf("Time of order: %d\n", item->time);
+    printf("Total weigth: %d\n", item->totalWeigth);
+}
+
+void printOrderQueue(orderedItemQueue *queue){
+    if(queue->head == NULL){
+        printf("Queue is empty\n");
+        return;
+    }
+
+    printf("queue head:\n");
+    printOrder(queue->head->el);
+
+    printf("queue tail:\n");
+    printOrder(queue->tail->el);
+
+    orderedItemList *node = queue->head;
+
+    printf("Queue in full:\n");
+    int i = 0;
+    while(node != NULL){
+        printf("Item number %d\n", i);
+        printOrder(node->el);
+        node = node->next;
+
+        i++;
+    }
 }
 
 
