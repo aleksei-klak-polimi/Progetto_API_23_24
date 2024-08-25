@@ -11,7 +11,7 @@ OUT_DIR = target
 OUT_BIN = $(OUT_DIR)/Main.out
 
 # Define compiler and linker flags
-CFLAGS += -Wall -Werror -std=gnu11 -g3
+CFLAGS += -Wall -Werror -std=gnu11 -g3 -O2
 LDFLAGS += -lm
 
 # Default target
