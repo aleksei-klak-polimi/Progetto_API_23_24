@@ -199,6 +199,7 @@ void            printSpaces(int count);
 void            printRecipie(recipie *r);
 void            printRecipieBook(recipiesMap *book);
 void            printOrderQueue(orderedItemQueue *queue);
+void            printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient);
 
 
 
@@ -312,6 +313,9 @@ int main(){
 
         /*printf("\nDebug tree print:\n");
         printRBTree(*root, 0);*/
+
+        printf("\nDebug map by ingredients print:\n");
+        printOrdersByIngredientMap(ordersByIngredientsMap);
     }
 
     return 0;
@@ -1428,8 +1432,6 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
                 int breaker = 0;
                 while(orderNode != NULL && breaker == 0){
                     if(orderNode->el == item){
-                        //todo check if possible to compare directly item and node, if they point to same memory address
-
                         // Order found, remove it from the queue
                         if(prevOrderNode == NULL){
                             //Removing the head of the queue
@@ -1937,6 +1939,52 @@ void printOrderQueue(orderedItemQueue *queue){
         node = node->next;
 
         i++;
+    }
+}
+
+void printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient) {
+    int i;
+
+    for (i = 0; i < HASHMAPSIZE; i++) {
+        if (ordersByIngredient->hashArray[i] != NULL) {
+            printf("Pos: %d\n", i);
+
+            orderedItemQueueList *hashHead = ordersByIngredient->hashArray[i];
+
+            int j = 0;
+            while (hashHead != NULL) {
+                printf("  Head %d contains: ", j);
+
+                if (hashHead->el == NULL) {
+                    printf("NULL");
+                } else {
+                    int k = 0;
+
+                    if (hashHead->el->head == NULL) {
+                        printf("0");
+                    } else {
+                        orderedItemList *node = hashHead->el->head;
+
+                        int breaker = 0;
+                        while (breaker == 0) {
+                            if(node != NULL){
+                                node = node->next;
+                                k++;
+                            }
+                            else{
+                                breaker = 1;
+                            }
+                        }
+
+                        printf("%d", k);
+                    }
+                }
+
+                printf("\n");  // Add a newline for readability
+                hashHead = hashHead->next;  // Move to the next hashHead in the list
+                j++;
+            }
+        }
     }
 }
 
