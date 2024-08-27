@@ -264,6 +264,12 @@ int main(){
 
         //CHECK IF COURIER TIME
         if(time != 0 && time % courier->frequency == 0){
+            //debug print
+            /*printf("\nReady orders queue contents:\n");
+            printOrderQueue(ordersReady);
+            printf("\n");*/
+
+
             loadCourier(courier, book, ordersReady);
             printCourierContents(courier);
             clearCourierOrdersMemory(courier);
@@ -314,8 +320,8 @@ int main(){
         /*printf("\nDebug tree print:\n");
         printRBTree(*root, 0);*/
 
-        printf("\nDebug map by ingredients print:\n");
-        printOrdersByIngredientMap(ordersByIngredientsMap);
+        /*printf("\nDebug map by ingredients print:\n");
+        printOrdersByIngredientMap(ordersByIngredientsMap);*/
     }
 
     return 0;
@@ -536,25 +542,30 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
 
     ch = readSupplies(lot);
 
-    ingredientLotList *navigator = lot;
-    while(navigator != NULL){
-        addIngredientToTree(root, navigator->el);
-        addIngredientToMap(map, navigator->el);
-        navigator = navigator->next;
+    ingredientLotList *IngredientLotNavigator = lot;
+    while(IngredientLotNavigator != NULL){
+        addIngredientToTree(root, IngredientLotNavigator->el);
+        addIngredientToMap(map, IngredientLotNavigator->el);
+        IngredientLotNavigator = IngredientLotNavigator->next;
     }
 
     //For each ingredient added with resupply try to fulfill pending orders from Ingredient map
-    navigator = lot;
+    IngredientLotNavigator = lot;
     int hash;
     orderedItemQueueList *hashHead;
-    orderedItemList *orderList = NULL;
-    orderedItemList *nextOrderNode = NULL;
+    orderedItemList *orderListNavigator = NULL;
     orderedItem *item;
     recipie *recipie;
 
-    while(navigator != NULL){
+    //Queue That stores all the orders that depend on the ingredients in this resupply batch ordered
+    //By time of order
+    orderedItemQueue *affectedOrdersQueue = malloc(sizeof(*affectedOrdersQueue));
+    affectedOrdersQueue->head = NULL;
+    affectedOrdersQueue->tail = NULL;
+
+    while(IngredientLotNavigator != NULL){
         //Cycle all ingredients in the resupply chain
-        hash = sdbm_hash(navigator->el->name);
+        hash = sdbm_hash(IngredientLotNavigator->el->name);
 
         hashHead = ordersByIngredient->hashArray[hash];
 
@@ -562,9 +573,9 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
             int breaker = 0;
             while(breaker == 0){
                 //Find list of orders associated with current ingredient
-                if(strcmp(hashHead->el->ingredient, navigator->el->name) == 0){
+                if(strcmp(hashHead->el->ingredient, IngredientLotNavigator->el->name) == 0){
                     breaker = 1;
-                    orderList = hashHead->el->head;
+                    orderListNavigator = hashHead->el->head;
                 }
                 else{
                     if(hashHead->next != NULL){
@@ -577,29 +588,90 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
             }
         }
 
-        while(orderList != NULL){
-            //Try to fulfill each order
-            recipie = retrieveRecipie(book, orderList->el->name);
+        while(orderListNavigator != NULL){
+            //Add each order to the queue of affected orders sorted by date of order           
+            if(affectedOrdersQueue->head == NULL){
+                //insert item into queue head
 
-            nextOrderNode = orderList->next;
-            if(removeIngredientsFromWarehouseByOrder(root, map, recipie, orderList->el->amount) == 1){
-                //Order was fulfilled, remove from pending and from map and add to orders ready
-
-                item = orderList->el;
-
-                removeOrderFromIngredientMap(item, ordersByIngredient, recipie->head);
-                removeOrderFromPending(item, ordersPending);
-                addOrderToReady(item, ordersReady);
+                affectedOrdersQueue->head = malloc(sizeof(*orderListNavigator));
+                affectedOrdersQueue->tail = affectedOrdersQueue->head;
+                affectedOrdersQueue->head->el = orderListNavigator->el;
             }
+            else{
+                if(affectedOrdersQueue->tail->el->time < orderListNavigator->el->time){
+                    //If item is older than the tail, place it as the new tail
+                    affectedOrdersQueue->tail->next = malloc(sizeof(*orderListNavigator));
+                    affectedOrdersQueue->tail->next->el = orderListNavigator->el;
+                    affectedOrdersQueue->tail->next->next = NULL;
+                    affectedOrdersQueue->tail = affectedOrdersQueue->tail->next;
+                }
+                else if(affectedOrdersQueue->head->el->time > orderListNavigator->el->time){
+                    //Item is younger than the queue's head, replace the head
+                    orderedItemList *newHead = malloc(sizeof(*newHead));
+                    newHead->el = orderListNavigator->el;
+                    newHead->next = affectedOrdersQueue->head;
+                    affectedOrdersQueue->head = newHead;
+                }
+                else{
+                    //item has to be placed somewhere inside the queue, navigate the queue and splice in the item
+                    orderedItemList *affectedQueueNavigator = affectedOrdersQueue->head;
 
-            orderList = nextOrderNode;
+                    int breaker = 0;
+                    while(breaker == 0){
+                        if(affectedQueueNavigator->el == orderListNavigator->el){
+                            //item is already queued, no need to perform additional actions
+                            breaker = 1;
+                        }
+                        //If next item is older than the one we are splicing then splice our between current and next
+                        else if(affectedQueueNavigator->next->el->time > orderListNavigator->el->time){
+                            breaker = 1;
+
+                            orderedItemList *newNode = malloc(sizeof(*newNode));
+                            newNode->el = orderListNavigator->el;
+                            newNode->next = affectedQueueNavigator->next;
+                            affectedQueueNavigator->next = newNode;
+
+                        }
+                        else{
+                            //Go to next node
+                            affectedQueueNavigator = affectedQueueNavigator->next;
+                        }                        
+                    }
+                }
+            }
+            orderListNavigator = orderListNavigator->next;
         }
-        orderList = NULL;
-        nextOrderNode = NULL;
+        orderListNavigator = NULL;
 
-
-        navigator = navigator->next;
+        IngredientLotNavigator = IngredientLotNavigator->next;
     }
+
+    //Try to fulfill the queue and free each node after attempted to fulfill
+
+    orderedItemList *affectedQueueNavigator = affectedOrdersQueue->head;
+    orderedItemList *prevNode = NULL;
+
+    while(affectedQueueNavigator != NULL){
+        recipie = retrieveRecipie(book, affectedQueueNavigator->el->name);
+
+        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, affectedQueueNavigator->el->amount) == 1){
+            //Order was fulfilled, remove from pending and from map and add to orders ready
+
+            item = affectedQueueNavigator->el;
+
+            removeOrderFromIngredientMap(item, ordersByIngredient, recipie->head);
+            removeOrderFromPending(item, ordersPending);
+            addOrderToReady(item, ordersReady);
+        }
+
+        prevNode = affectedQueueNavigator;
+        affectedQueueNavigator = affectedQueueNavigator->next;
+
+        free(prevNode);
+    }
+
+    free(affectedOrdersQueue);
+            
 
 
 
@@ -763,11 +835,9 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
                 return 0;
             }
             if(strcmp(hashHead->el->el->name, ingredient->name) == 0){
+                breaker = 1;
                 if(hashHead->totalAmount < (ingredient->amount *quantity)){
                     return 0;
-                }
-                else{
-                    breaker = 1;
                 }
             }
             else if(hashHead->next == NULL){
@@ -1288,6 +1358,7 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
         incrementRecipieUtilization(book, recipie->name);
 
         //Calcuate order weigth
+        //todo store recipie weight in recipie struct
         ingredientList *ingredientNode = recipie->head;
         int weigth = 0;
         while(ingredientNode != NULL){
@@ -1305,11 +1376,12 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
             //The order was processed immediately, adding to orders ready
             if(ordersReady->head == NULL){
                 ordersReady->head = orderNode;
+                ordersReady->tail = orderNode;
             }
-            if(ordersReady->tail != NULL){
+            else{
                 ordersReady->tail->next = orderNode;
+                ordersReady->tail = orderNode;
             }
-            ordersReady->tail = orderNode;
         }
         else{
             //The order could not be processed due to lacking ingredients, adding order to waiting queue and to ingredientMap
