@@ -596,6 +596,7 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
                 affectedOrdersQueue->head = malloc(sizeof(*orderListNavigator));
                 affectedOrdersQueue->tail = affectedOrdersQueue->head;
                 affectedOrdersQueue->head->el = orderListNavigator->el;
+                affectedOrdersQueue->head->next = NULL;
             }
             else{
                 if(affectedOrdersQueue->tail->el->time < orderListNavigator->el->time){
