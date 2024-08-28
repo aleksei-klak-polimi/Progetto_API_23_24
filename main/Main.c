@@ -28,6 +28,7 @@ void            printRecipie(recipie *r);
 void            printRecipieBook(recipiesMap *book);
 void            printOrderQueue(orderedItemQueue *queue);
 void            printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient);
+void            printIngredientMap(warehouseMap *map);
 
 
 
@@ -95,6 +96,10 @@ int main(){
             //debug print
             /*printf("\nReady orders queue contents:\n");
             printOrderQueue(ordersReady);
+            printf("\n");
+
+            printf("\nPending orders queue contents:\n");
+            printOrderQueue(ordersPending);
             printf("\n");*/
 
 
@@ -144,6 +149,8 @@ int main(){
         }
         
         time++;
+
+        //printIngredientMap(whMap);
 
         /*printf("\nDebug tree print:\n");
         printRBTree(*root, 0);*/
@@ -255,14 +262,19 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
                     //item has to be placed somewhere inside the queue, navigate the queue and splice in the item
                     orderedItemList *affectedQueueNavigator = affectedOrdersQueue->head;
 
+                    if(affectedQueueNavigator->el == orderListNavigator->el){
+                        printf(": )");
+                    }
+
                     int breaker = 0;
                     while(breaker == 0){
                         if(affectedQueueNavigator->el == orderListNavigator->el){
                             //item is already queued, no need to perform additional actions
-                            breaker = 1;
+                            affectedQueueNavigator = affectedQueueNavigator->next;
                         }
-                        //If next item is older than the one we are splicing then splice our between current and next
-                        else if(affectedQueueNavigator->next->el->time > orderListNavigator->el->time){
+                        else if(affectedQueueNavigator->el->time < orderListNavigator->el->time && (affectedQueueNavigator->next == NULL || affectedQueueNavigator->next->el->time > orderListNavigator->el->time)){
+                            //If next item is older than the one we are splicing then splice our between current and next
+                            
                             breaker = 1;
 
                             orderedItemList *newNode = malloc(sizeof(*newNode));
@@ -462,11 +474,12 @@ void printOrderQueue(orderedItemQueue *queue){
 
     orderedItemList *node = queue->head;
 
-    printf("Queue in full:\n");
+    printf("\nQueue in full:\n");
     int i = 0;
     while(node != NULL){
         printf("Item number %d\n", i);
         printOrder(node->el);
+        printf("\n");
         node = node->next;
 
         i++;
@@ -509,6 +522,33 @@ void printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient) {
 
                         printf("%d", k);
                     }
+                }
+
+                printf("\n");  // Add a newline for readability
+                hashHead = hashHead->next;  // Move to the next hashHead in the list
+                j++;
+            }
+        }
+    }
+}
+
+void printIngredientMap(warehouseMap *map){
+    int i;
+
+    for (i = 0; i < HASHMAPSIZE; i++) {
+        if (map->hashArray[i] != NULL) {
+            printf("Pos: %d\n", i);
+
+            ingredientLotListList *hashHead = map->hashArray[i];
+
+            int j = 0;
+            while (hashHead != NULL) {
+                printf("  Head %d contains: ", j);
+
+                if (hashHead->el == NULL) {
+                    printf("NULL");
+                } else {
+                    printf("Ingredient: %s, amount: %d", hashHead->el->el->name, hashHead->totalAmount);
                 }
 
                 printf("\n");  // Add a newline for readability

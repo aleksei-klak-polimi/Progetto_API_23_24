@@ -122,26 +122,24 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
                 //Navigate the ingredient list and stop on the first node where
                 //next node expires later than s
 
+                
                 int nodeFound = 0;
-                do{
-                    if(currentIngredientLot->next == NULL || currentIngredientLot->next->el->time > s->time){
+                while(nodeFound == 0){
+                    if(currentIngredientLot->el->time == s->time){
                         nodeFound = 1;
+                        currentIngredientLot->el->amount += s->amount;
+                        free(s);
+                    }
+                    else if(currentIngredientLot->el->time < s->time && (currentIngredientLot->next == NULL || currentIngredientLot->next->el->time > s->time)){
+                        nodeFound = 1;
+                        ingredientLotList *newNode = malloc(sizeof(*newNode));
+                        newNode->el = s;
+                        newNode->next = currentIngredientLot->next;
+                        currentIngredientLot->next = newNode;
                     }
                     else{
                         currentIngredientLot = currentIngredientLot->next;
                     }
-                }
-                while(nodeFound == 0);
-
-                if(!(currentIngredientLot->el->time == s->time)){
-                    ingredientLotList *newLot = malloc(sizeof(*newLot));
-                    newLot->el = s;
-                    newLot->next = currentIngredientLot->next;
-                    currentIngredientLot->next = newLot;
-                }
-                else{
-                    currentIngredientLot->el->amount += s->amount;
-                    free(s);
                 }
             }
         }

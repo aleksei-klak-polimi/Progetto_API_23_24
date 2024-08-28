@@ -102,9 +102,6 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
                     return 0;
                 }
             }
-            else if(hashHead->next == NULL){
-                return 0;
-            }
             else{
                 hashHead = hashHead->next;
             }
@@ -115,13 +112,15 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
 
 
     currentIngredientNode = firstIngredientNode;
-    int totalAmount = currentIngredientNode->el->amount *quantity;
+    int totalAmount;
 
     ingredientLotListList *prevHashHead = NULL;
     ingredientLotList *ingredientHead;
     ingredientLotList *prevIngredientHead = NULL;
 
     while(currentIngredientNode != NULL){
+        totalAmount = currentIngredientNode->el->amount * quantity;
+
         //Locate the hashHead
         hash = sdbm_hash(currentIngredientNode->el->name);
         hashHead = map->hashArray[hash];
@@ -133,8 +132,8 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
                 breaker = 1;
             }
             else{
-                    prevHashHead = hashHead;
-                    hashHead = hashHead->next;
+                prevHashHead = hashHead;
+                hashHead = hashHead->next;
                 }
         }
         //HashHead located
@@ -159,6 +158,10 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
             else{
                 //Ingredients will be left over so no need to delete the node, only decrease the amount in hashHead
                 hashHead->totalAmount -= totalAmount;
+
+                ingredientHead->el->amount -= totalAmount;
+
+
                 totalAmount = 0;
             }
         }
