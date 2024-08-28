@@ -3,20 +3,8 @@
 #include <string.h>
 
 #include "String.h"
+#include "TimedItems.h"
 #include "Map.h"
-
-struct numberedTimedItem{
-    String  name;
-    int     amount;
-    int     time;
-    int     totalWeigth;
-};
-
-
-struct numberedTimedItemList{
-    struct numberedTimedItem        *el;
-    struct numberedTimedItemList    *next;
-};
 
 struct numberedTimedItemListList{
     int                                 totalAmount;
