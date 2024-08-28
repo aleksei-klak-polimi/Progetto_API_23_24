@@ -19,6 +19,7 @@ struct numberedItemList{
 struct namedNumberedItemList{
     String                      name;
     struct numberedItemList     *head;
+    int                         weight;
 };
 
 
@@ -45,10 +46,10 @@ typedef struct namedNumberedItemListListMap     recipiesMap;
 
 
 
-
+//Parsing function
+int             readRecipie(recipie *r);
 
 void            insertRecipie(recipiesMap *book, recipie *recipie);
-int             readRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
 void            decrementRecipieUtilization(recipiesMap *book, String name);
 void            incrementRecipieUtilization(recipiesMap *book, String name);

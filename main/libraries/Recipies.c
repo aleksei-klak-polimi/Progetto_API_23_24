@@ -16,14 +16,15 @@ int readRecipie(recipie *r){
     r->name[i] = '\0';
 
 
-    ingredientList *head = 0;
-    ingredientList *prev = 0;
-    ingredientList *current = 0;
+    ingredientList *head = NULL;
+    ingredientList *prev = NULL;
+    ingredientList *current = NULL;
+
+    int totalWeigth = 0;
     
     //READ INGREDIENTS
     while(ch != '\n' && ch != EOF){
-        ingredient *ingr;
-        ingr = malloc(sizeof(*ingr));
+        ingredient *ingr = malloc(sizeof(*ingr));
 
         //READ INGREDIENT
         i = 0;
@@ -42,26 +43,28 @@ int readRecipie(recipie *r){
         }
         amount[i] = '\0';
         ingr->amount = atoi(amount);
+        totalWeigth += ingr->amount;
 
 
         //STORE INGREDIENT IN NODE
-        if(current != 0){
+        if(current != NULL){
             prev = current;
         }
         current = malloc(sizeof(*current));
         current->el = ingr;
-        current->next = 0;
+        current->next = NULL;
         //LINK PREV NODE TO NEW NODE
-        if(prev != 0){
+        if(prev != NULL){
             prev->next = current;
         }
-        else if(head == 0){
+        else if(head == NULL){
             head = current;
         }
     }
 
     //ADD LIST OF INGREDIENTS TO RECIPIE
     r->head = head;
+    r->weight = totalWeigth;
 
     return ch;
 }
@@ -74,18 +77,18 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
     int duplicate = 0;
 
     if(book->hashArray[hash] == NULL){
-        recipiesList *head;
-        head = malloc(sizeof(*head));
-        head->el = recipie;
-        head->next = NULL;
-        head->ordersPending = 0;
+        //No recipies with same hash, create first hashHead
+        recipiesList *hashHead = malloc(sizeof(*hashHead));
+        hashHead->el = recipie;
+        hashHead->next = NULL;
+        hashHead->ordersPending = 0;
 
-        book->hashArray[hash] = head;
+        book->hashArray[hash] = hashHead;
 
         printf("aggiunta\n");
     }
     else{
-        recipiesList *node = book->hashArray[hash];
+        recipiesList *hashNode = book->hashArray[hash];
 
         /*
         While(node != NULL) causes segmentation fault at line node->next = newNode
@@ -93,15 +96,15 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
         do while allows to check the name on size 1 and prevents segmentation fault.
         */
         do {   
-            if(strcmp(node->el->name, recipie->name) == 0){
+            if(strcmp(hashNode->el->name, recipie->name) == 0){
                 duplicate = 1;
                 break;
             }
             else{
-                node = node->next;
+                hashNode = hashNode->next;
             }
         }
-        while(node->next != NULL);
+        while(hashNode->next != NULL);
 
         if(duplicate == 0){
             recipiesList *newNode;
@@ -110,7 +113,7 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
             newNode->next = NULL;
             newNode->ordersPending = 0;
 
-            node->next = newNode;
+            hashNode->next = newNode;
 
             printf("aggiunta\n");
         }
@@ -139,7 +142,6 @@ int removeRecipie(recipiesMap *book){
 
     //CHECK IF MAP CONTAINS HASH
     if(book->hashArray[hash] == NULL){
-        //todo check if printf is good for stdout
         printf("non presente\n");
     }
     else{
@@ -162,23 +164,21 @@ int removeRecipie(recipiesMap *book){
             }
         }
         else{
+            //Recipie to remove is not the head, checking other nodes
             
             //To keep the list linked, we iterate through the list using prev and see if prev->next is the match
             //this way we can link together the remainder of the list after we cut out prev->next
-            int breaker = 0;
-            while(breaker == 0){
+            while(prev->next != NULL){
                 if(strcmp(prev->next->el->name, name) == 0){
                     found = 1;
-                    breaker = 1;
                     if(book->hashArray[hash]->ordersPending == 0){
                         allowed = 1;
                         target = prev->next;
 
                         //Remove the target from list
                         prev->next = target->next;
-
-                        break;
                     }
+                    break;
                 }
                 else{
                     prev = prev->next;
@@ -187,20 +187,30 @@ int removeRecipie(recipiesMap *book){
         }
 
         if(found == 0){
-            //todo check if printf is good for stdout
             printf("non presente\n");
         }
         else if(allowed == 1){
             //CLEARING MEMORY
+            ingredientList *ingredientCurr = target->el->head;
+            ingredientList *ingredientPrev = NULL;
+
+            while(ingredientCurr != NULL){
+                //Clear all ingredients
+                ingredientPrev = ingredientCurr;
+                ingredientCurr = ingredientCurr->next;
+                free(ingredientPrev);
+            }
+
+            //Clear recipie and hashHead from memory
+            free(target->el);
             free(target);
+
+
             printf("rimossa\n");
         }
         else if(found == 1 && allowed == 0){
             //the recipie was found but is in use by pending orders
             printf("ordini in sospeso\n");
-        }
-        else{
-            printf("Conditions not met");
         }
     }
 
