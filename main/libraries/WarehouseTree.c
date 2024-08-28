@@ -386,3 +386,30 @@ void treeTransplant(warehouseTreeNode **root, warehouseTreeNode *u, warehouseTre
     }
     v->parent = u->parent;
 }
+
+
+
+
+
+// Recursive function to print the tree
+void printSpaces(int count) {
+    for (int i = 0; i < count; i++) {
+        printf("  ");
+    }
+}
+
+void printRBTree(warehouseTreeNode *node, int level) {
+    if (node == NULL || node == NIL) {
+        return;
+    }
+
+    // Print the right subtree first (higher values on the right)
+    printRBTree(node->right, level + 1);
+
+    // Print current node
+    printSpaces(level);  // Indent according to the current level
+    printf("%s[Expiration: %d]\n", node->isBlack ? "B" : "R", node->expiration);
+
+    // Print the left subtree
+    printRBTree(node->left, level + 1);
+}

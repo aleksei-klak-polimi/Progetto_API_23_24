@@ -25,3 +25,5 @@ void            rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTree
 void            rebalanceTreeAfterInsertion(warehouseTreeNode **root, warehouseTreeNode *x);
 void            leftRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 void            rightRotate(warehouseTreeNode **root, warehouseTreeNode *x);
+
+void            printRBTree(warehouseTreeNode *node, int level);

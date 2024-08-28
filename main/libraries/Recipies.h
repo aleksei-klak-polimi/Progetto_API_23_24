@@ -1,3 +1,6 @@
+#ifndef RECIPIES_H_INCLUDED
+#define RECIPIES_H_INCLUDED
+
 #include "String.h"
 #include "Map.h"
 
@@ -50,3 +53,6 @@ void            deleteRecipie(recipiesMap book, String name);
 void            decrementRecipieUtilization(recipiesMap *book, String name);
 void            incrementRecipieUtilization(recipiesMap *book, String name);
 recipie         *retrieveRecipie(recipiesMap *book, String name);
+
+
+#endif

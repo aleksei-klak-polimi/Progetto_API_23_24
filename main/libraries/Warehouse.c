@@ -1,5 +1,63 @@
 #include "Warehouse.h"
 
+int readSupplies(ingredientLotList *s){
+    int ch = 0;
+    int i;
+    ingredientLotList *current = s;
+
+    while(ch != '\n' && ch != EOF){
+
+
+        //ALLOCATE ELEMENT
+        ingredientLot *el;
+        el = malloc(sizeof(*el));
+
+
+        //READ INGREDIENT NAME
+        i = 0;
+        while((ch = fgetc(stdin)) != ' '){
+            el->name[i] = ch;
+            i++;
+        }
+        el->name[i] = '\0';
+
+
+        //READ INGREDIENT AMOUNT
+        i = 0;
+        String amount;
+        while((ch = fgetc(stdin)) != ' '){
+            amount[i] = ch;
+            i++;
+        }
+        amount[i] = '\0';
+        el->amount = atoi(amount);
+
+
+        //READ INGREDIENT TIME
+        i = 0;
+        String time;
+        while((ch = fgetc(stdin)) != ' ' && ch != '\n' && ch != EOF){
+            time[i] = ch;
+            i++;
+        }
+        time[i] = '\0';
+        el->time = atoi(time);
+
+
+        //UPDATE LIST
+        current->el = el;
+        if(ch == ' '){
+            current->next = malloc(sizeof(*current));
+            current = current->next;
+        }
+        else{
+            current->next = NULL;
+        }
+    }
+
+    return ch;
+}
+
 void removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap *map, int time){
     //Removes all ingredients with expiration at the provided time from both Map and tree
     StringList *ingredients = removeNodeFromTreeByTime(root, time);
