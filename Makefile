@@ -14,7 +14,7 @@ OUT_DIR = target
 OUT_BIN = $(OUT_DIR)/Main.out
 
 # List of library source files to be compiled
-LIB_SRC = $(LIB_DIR)/Map.c
+LIB_SRC = $(LIB_DIR)/Map.c $(LIB_DIR)/Recipies.c
 
 # Generate corresponding .o filenames for the object files
 LIB_OBJ = $(patsubst $(LIB_DIR)/%.c, $(OUT_DIR)/%.o, $(LIB_SRC))
