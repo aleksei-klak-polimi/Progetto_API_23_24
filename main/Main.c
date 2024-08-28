@@ -2,23 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define HASHMAPSIZE 1024
-#define STRINGSIZE 256
-
-
-
-
-
-//OPERATIONAL STRUCTURES
-typedef char String[STRINGSIZE];
-
-typedef struct StringList{
-    String              el;
-    struct StringList   *next;
-}StringList;
-
-
-
+#include "libraries/String.h"
+#include "libraries/Map.h"
 
 
 //STRUCTURES
@@ -152,7 +137,6 @@ int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *
 void            loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady);
 
 //RECIPIES
-unsigned int    sdbm_hash(String string);
 void            insertRecipie(recipiesMap *book, recipie *recipie);
 int             readRecipie(recipie *r);
 void            deleteRecipie(recipiesMap book, String name);
@@ -2060,20 +2044,4 @@ void printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient) {
             }
         }
     }
-}
-
-
-
-
-
-//UTILITY FUNCTIONS
-unsigned int sdbm_hash(String string){
-    unsigned long hash = 0;
-    int c;
-
-    while((c = *string++)){
-        hash = c + (hash << 6) + (hash << 16) - hash;
-    }
-
-    return hash % HASHMAPSIZE;
 }
