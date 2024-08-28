@@ -1425,6 +1425,7 @@ void addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIng
         
             ordersQueue = malloc(sizeof(*ordersQueue));
             hashHead->el = ordersQueue;
+            hashHead->next = NULL;
 
             orderNode = malloc(sizeof(*orderNode));
             orderNode->el = item;
