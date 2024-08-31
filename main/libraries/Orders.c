@@ -174,10 +174,28 @@ void removeOrderFromPending(orderedItem *item, orderedItemQueue *ordersWaiting){
             //Item found
             breaker = 1;
             if(prev == NULL){
-                ordersWaiting->head = current->next;
+                //item is the head of the queue
+                if(current->next == NULL){
+                    //item is the only one in queue
+                    ordersWaiting->head = NULL;
+                    ordersWaiting->tail = NULL;
+                }
+                else{
+                    //Item is head but not the only one
+                    ordersWaiting->head = current->next;
+                }
             }
             else{
-                prev->next = current->next;
+                //item is not the head of the queue
+                if(ordersWaiting->tail == current){
+                    //item is the tail
+                    prev->next = NULL;
+                    ordersWaiting->tail = prev;
+                }
+                else{
+                    //item is in the middle of the queue
+                    prev->next = current->next;
+                }
             }
 
             free(current);

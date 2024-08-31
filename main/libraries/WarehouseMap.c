@@ -107,10 +107,10 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
             if(currentIngredientLot->el->time == s->time){
                 //A lot with same expiration is at the head of the list
 
-                //increment amount in the node
-                currentIngredientLot->el->amount += s->amount;
-
-                free(s);
+                //Replace duplicate ingredient lot with the one passed as parameter
+                s->amount += currentIngredientLot->el->amount;
+                free(currentIngredientLot->el);
+                currentIngredientLot->el = s;
             }
             else if(currentIngredientLot->el->time > s->time){
                 //Head of ingredients list is greater than new ingredient lot
@@ -127,8 +127,11 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
                 while(nodeFound == 0){
                     if(currentIngredientLot->el->time == s->time){
                         nodeFound = 1;
-                        currentIngredientLot->el->amount += s->amount;
-                        free(s);
+
+                        //Replace duplicate ingredient lot with the one passed as parameter
+                        s->amount += currentIngredientLot->el->amount;
+                        free(currentIngredientLot->el);
+                        currentIngredientLot->el = s;
                     }
                     else if(currentIngredientLot->el->time < s->time && (currentIngredientLot->next == NULL || currentIngredientLot->next->el->time > s->time)){
                         nodeFound = 1;

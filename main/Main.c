@@ -262,25 +262,24 @@ int resupply(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ord
                     //item has to be placed somewhere inside the queue, navigate the queue and splice in the item
                     orderedItemList *affectedQueueNavigator = affectedOrdersQueue->head;
 
-                    if(affectedQueueNavigator->el == orderListNavigator->el){
-                        printf(": )");
-                    }
-
                     int breaker = 0;
                     while(breaker == 0){
                         if(affectedQueueNavigator->el == orderListNavigator->el){
-                            //item is already queued, no need to perform additional actions
-                            affectedQueueNavigator = affectedQueueNavigator->next;
-                        }
-                        else if(affectedQueueNavigator->el->time < orderListNavigator->el->time && (affectedQueueNavigator->next == NULL || affectedQueueNavigator->next->el->time > orderListNavigator->el->time)){
-                            //If next item is older than the one we are splicing then splice our between current and next
-                            
                             breaker = 1;
+                        }
+                        else if(affectedQueueNavigator->el != orderListNavigator->el && affectedQueueNavigator->el->time < orderListNavigator->el->time){
+                            //If next item is older than the one we are splicing then splice our between current and next
+                            if(affectedQueueNavigator->next == NULL || affectedQueueNavigator->next->el->time > orderListNavigator->el->time){
+                                breaker = 1;
 
-                            orderedItemList *newNode = malloc(sizeof(*newNode));
-                            newNode->el = orderListNavigator->el;
-                            newNode->next = affectedQueueNavigator->next;
-                            affectedQueueNavigator->next = newNode;
+                                orderedItemList *newNode = malloc(sizeof(*newNode));
+                                newNode->el = orderListNavigator->el;
+                                newNode->next = affectedQueueNavigator->next;
+                                affectedQueueNavigator->next = newNode;
+                            }
+                            else{
+                                affectedQueueNavigator = affectedQueueNavigator->next;
+                            }
 
                         }
                         else{
