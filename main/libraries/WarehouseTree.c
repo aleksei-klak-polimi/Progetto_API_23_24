@@ -228,6 +228,8 @@ void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
     if(yOrignialColor == 1){
         rebalanceTreeAfterDelete(root, x);
     }
+
+    free(z);
 }
 
 void rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x){
