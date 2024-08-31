@@ -89,22 +89,24 @@ void insertRecipie(recipiesMap *book, recipie *recipie){
     }
     else{
         recipiesList *hashNode = book->hashArray[hash];
+        recipiesList *prevHashNode = NULL;
 
         /*
         While(node != NULL) causes segmentation fault at line node->next = newNode
         While(node->next != NULL) skips the check on if the names of the recipies are the same when the list is size = 1
         do while allows to check the name on size 1 and prevents segmentation fault.
         */
-        do {   
+        while(hashNode != NULL){   
             if(strcmp(hashNode->el->name, recipie->name) == 0){
                 duplicate = 1;
                 break;
             }
             else{
+                prevHashNode = hashNode;
                 hashNode = hashNode->next;
             }
         }
-        while(hashNode->next != NULL);
+        hashNode = prevHashNode;
 
         if(duplicate == 0){
             recipiesList *newNode;
