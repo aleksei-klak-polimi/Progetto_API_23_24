@@ -124,6 +124,7 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
         //Locate the hashHead
         hash = sdbm_hash(currentIngredientNode->el->name);
         hashHead = map->hashArray[hash];
+        prevHashHead = NULL;
         ingredient = currentIngredientNode->el;
 
         int breaker = 0;
@@ -138,6 +139,7 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
         }
         //HashHead located
         ingredientHead = hashHead->el;
+        prevIngredientHead = NULL;
 
         //Trim the list of Lots
         while(totalAmount > 0){
