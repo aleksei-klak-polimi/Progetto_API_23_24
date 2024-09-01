@@ -7,13 +7,18 @@
 int readRecipie(recipiesMap *book, recipie *r){
     int ch;
     int i = 0;
+    char buffer[256];
 
     //READ NAME
     while((ch = fgetc(stdin)) != '\n' && ch != ' ' && ch != EOF){
-        r->name[i] = ch;
+        buffer[i] = ch;
         i++;
     }
-    r->name[i] = '\0';
+    buffer[i] = '\0';
+
+    r->name = malloc(strlen(buffer)+1);
+    strcpy(r->name, buffer);
+
 
     //Check if recipie is already in the map before reading the rest of the ingredients
     int duplicate = 0;
@@ -36,7 +41,7 @@ int readRecipie(recipiesMap *book, recipie *r){
         //free the room already allocated to the recipie
         free(r);
 
-        printf("ignorato");
+        printf("ignorato\n");
 
         //skip stdin to next line, ignore the rest of the recipie
         while(ch != '\n' && ch != EOF){
@@ -63,10 +68,15 @@ int readRecipie(recipiesMap *book, recipie *r){
         //READ INGREDIENT
         i = 0;
         while((ch = fgetc(stdin)) != ' '){
-            ingr->name[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        ingr->name[i] = '\0';
+        buffer[i] = '\0';
+
+        ingr->name = malloc(strlen(buffer)+1);
+        strcpy(ingr->name, buffer);
+
+
 
         //READ AMOUNT
         i = 0;

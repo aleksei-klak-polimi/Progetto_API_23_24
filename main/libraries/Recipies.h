@@ -5,7 +5,7 @@
 #include "Map.h"
 
 struct numberedItem{
-    String  name;
+    char    *name;
     int     amount;
 };
 
@@ -17,7 +17,7 @@ struct numberedItemList{
 
 
 struct namedNumberedItemList{
-    String                      name;
+    char                        *name;
     struct numberedItemList     *head;
     int                         weight;
 };

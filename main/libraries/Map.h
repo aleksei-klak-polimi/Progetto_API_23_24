@@ -2,4 +2,4 @@
 
 #define HASHMAPSIZE 1024
 
-unsigned int sdbm_hash(String string);
+unsigned int sdbm_hash(char *string);

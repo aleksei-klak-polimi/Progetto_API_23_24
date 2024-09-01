@@ -1,6 +1,6 @@
 #include "Map.h"
 
-unsigned int sdbm_hash(String string){
+unsigned int sdbm_hash(char *string){
     unsigned long hash = 0;
     int c;
 
