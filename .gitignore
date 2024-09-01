@@ -1,4 +1,9 @@
 specs/*
 target/*
 .vscode/*
-test_cases_pubblici/*
+/main/bigMain/*
+tests/*
+output/*
+massif*
+vgcore*
+callgrind*
