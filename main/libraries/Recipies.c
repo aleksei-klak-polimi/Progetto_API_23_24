@@ -150,19 +150,18 @@ int removeRecipie(recipiesMap *book){
         //IF MAP CONTAINS HASH CHECK THE LIST FOR MATCHES
         int found = 0;
         int allowed = 0;
-        recipiesList *prev = book->hashArray[hash];
-        recipiesList *target;
+        recipiesList *prevHashHead = NULL;
+        recipiesList *currHashHead = book->hashArray[hash];
 
         //CHECK IF THE HEAD OF THE LIST IS THE MATCH
         if(strcmp(book->hashArray[hash]->el->name, name) == 0){
             found = 1;
             if(book->hashArray[hash]->ordersPending == 0){
                 allowed = 1;
-                target = book->hashArray[hash];
 
                 //If next was null then array now has position[hash] = null
                 //if next was another node then old_next is the head at array[hash]
-                book->hashArray[hash] = prev->next;
+                book->hashArray[hash] = currHashHead->next;
             }
         }
         else{
@@ -170,20 +169,20 @@ int removeRecipie(recipiesMap *book){
             
             //To keep the list linked, we iterate through the list using prev and see if prev->next is the match
             //this way we can link together the remainder of the list after we cut out prev->next
-            while(prev->next != NULL){
-                if(strcmp(prev->next->el->name, name) == 0){
+            while(currHashHead != NULL){
+                if(strcmp(currHashHead->el->name, name) == 0){
                     found = 1;
-                    if(book->hashArray[hash]->ordersPending == 0){
+                    if(currHashHead->ordersPending == 0){
                         allowed = 1;
-                        target = prev->next;
 
                         //Remove the target from list
-                        prev->next = target->next;
+                        prevHashHead->next = currHashHead->next;
                     }
                     break;
                 }
                 else{
-                    prev = prev->next;
+                    prevHashHead = currHashHead;
+                    currHashHead = currHashHead->next;
                 }
             }
         }
@@ -193,7 +192,7 @@ int removeRecipie(recipiesMap *book){
         }
         else if(allowed == 1){
             //CLEARING MEMORY
-            ingredientList *ingredientCurr = target->el->head;
+            ingredientList *ingredientCurr = currHashHead->el->head;
             ingredientList *ingredientPrev = NULL;
 
             while(ingredientCurr != NULL){
@@ -204,8 +203,8 @@ int removeRecipie(recipiesMap *book){
             }
 
             //Clear recipie and hashHead from memory
-            free(target->el);
-            free(target);
+            free(currHashHead->el);
+            free(currHashHead);
 
 
             printf("rimossa\n");
