@@ -4,7 +4,7 @@
 
 #include "Recipies.h"
 
-int readRecipie(recipie *r){
+int readRecipie(recipiesMap *book, recipie *r){
     int ch;
     int i = 0;
 
@@ -14,6 +14,40 @@ int readRecipie(recipie *r){
         i++;
     }
     r->name[i] = '\0';
+
+    //Check if recipie is already in the map before reading the rest of the ingredients
+    int duplicate = 0;
+    int hash = sdbm_hash(r->name);
+
+    recipiesList *hashHead = book->hashArray[hash];
+
+    while(hashHead != NULL){
+        if(strcmp(hashHead->el->name, r->name) == 0){
+            duplicate = 1;
+            break;
+        }
+
+        hashHead = hashHead->next;
+    }
+
+    if(duplicate == 1){
+        //recipie with same name was already stored in the map
+
+        //free the room already allocated to the recipie
+        free(r);
+
+        printf("ignorato");
+
+        //skip stdin to next line, ignore the rest of the recipie
+        while(ch != '\n' && ch != EOF){
+            ch = getc(stdin);
+        }
+
+        return ch;
+    }
+
+    //If function did not return then duplicate was 0, keep reading the recipie as normal
+
 
 
     ingredientList *head = NULL;
@@ -66,63 +100,18 @@ int readRecipie(recipie *r){
     r->head = head;
     r->weight = totalWeigth;
 
+    //Insert recipie into map
+    hashHead = malloc(sizeof(*hashHead));
+    hashHead->el = r;
+    hashHead->ordersPending = 0;
+
+    hashHead->next = book->hashArray[hash];
+    book->hashArray[hash] = hashHead;
+
+    printf("aggiunta\n");
+
+
     return ch;
-}
-
-void insertRecipie(recipiesMap *book, recipie *recipie){
-    //Inserts given recipie into recipie book
-    //malloc recipiesList
-
-    int hash = sdbm_hash(recipie->name);
-    int duplicate = 0;
-
-    if(book->hashArray[hash] == NULL){
-        //No recipies with same hash, create first hashHead
-        recipiesList *hashHead = malloc(sizeof(*hashHead));
-        hashHead->el = recipie;
-        hashHead->next = NULL;
-        hashHead->ordersPending = 0;
-
-        book->hashArray[hash] = hashHead;
-
-        printf("aggiunta\n");
-    }
-    else{
-        recipiesList *hashNode = book->hashArray[hash];
-        recipiesList *prevHashNode = NULL;
-
-        /*
-        While(node != NULL) causes segmentation fault at line node->next = newNode
-        While(node->next != NULL) skips the check on if the names of the recipies are the same when the list is size = 1
-        do while allows to check the name on size 1 and prevents segmentation fault.
-        */
-        while(hashNode != NULL){   
-            if(strcmp(hashNode->el->name, recipie->name) == 0){
-                duplicate = 1;
-                break;
-            }
-            else{
-                prevHashNode = hashNode;
-                hashNode = hashNode->next;
-            }
-        }
-        hashNode = prevHashNode;
-
-        if(duplicate == 0){
-            recipiesList *newNode;
-            newNode = malloc(sizeof(*newNode));
-            newNode->el = recipie;
-            newNode->next = NULL;
-            newNode->ordersPending = 0;
-
-            hashNode->next = newNode;
-
-            printf("aggiunta\n");
-        }
-        else{
-            printf("ignorato\n");
-        }
-    }
 }
 
 int removeRecipie(recipiesMap *book){

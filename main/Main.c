@@ -173,8 +173,7 @@ int addRecipie(recipiesMap *book){
     //malloc for recipie.
     int ch;
     recipie *r = malloc(sizeof(*r));
-    ch = readRecipie(r);
-    insertRecipie(book, r);
+    ch = readRecipie(book, r);
 
     return ch;
 }
@@ -224,6 +223,25 @@ int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap 
         addIngredientToMap(map, IngredientLotNavigator->el);
         IngredientLotNavigator = IngredientLotNavigator->next;
     }
+
+    orderedItemList *pendingOrdersNavigator = ordersPending->head;
+    orderedItemList *pendingOrdersPrev = NULL;
+    recipie *recipie = NULL;
+    
+
+    while(pendingOrdersNavigator != NULL){
+        recipie = retrieveRecipie(book, pendingOrdersNavigator->el->name);
+
+        pendingOrdersPrev = pendingOrdersNavigator;
+        pendingOrdersNavigator = pendingOrdersNavigator->next;
+
+        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, pendingOrdersPrev->el->amount) == 1){
+            addOrderToReady(pendingOrdersPrev->el, ordersReady);
+            removeOrderFromPending(pendingOrdersPrev->el, ordersPending);
+        }
+    }
+
+    /*
 
     //For each ingredient added with resupply try to fulfill pending orders from Ingredient map
     IngredientLotNavigator = lot;
@@ -351,7 +369,7 @@ int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap 
         free(prevNode);
     }
 
-    free(affectedOrdersQueue);
+    free(affectedOrdersQueue);*/
             
 
 
@@ -431,7 +449,7 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
             ordersWaiting->tail = orderNode;
 
 
-            addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
+            //addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
         }
 
         printf("accettato\n");
