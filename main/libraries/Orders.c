@@ -107,19 +107,26 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
                 while(orderNode != NULL && breaker == 0){
                     if(orderNode->el == item){
                         // Order found, remove it from the queue
-                        if(prevOrderNode == NULL){
+
+                        if(ordersQueue->head == ordersQueue->tail){
+                            //order is the only one in the queue
+                            ordersQueue->head = NULL;
+                            ordersQueue->tail = NULL;
+                        }
+                        else if(prevOrderNode == NULL){
+                            //Order is the head but is not the only element
                             //Removing the head of the queue
                             ordersQueue->head = orderNode->next;
                         }
+                        else if(orderNode->next == NULL){
+                            //Order is the tail but is not the only one
+                            ordersQueue->tail = prevOrderNode;
+                            prevOrderNode->next = NULL;
+                        }
                         else{
+                            //Order is neither head nor tail
                             prevOrderNode->next = orderNode->next;
                         }
-
-                        if(orderNode == ordersQueue->tail){
-                            // If it's the tail, update the tail pointer
-                            ordersQueue->tail = prevOrderNode;
-                        }
-
                         free(orderNode);
                         breaker = 1;
                     }
@@ -139,7 +146,6 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
                     } else {
                         prevHashHead->next = hashHead->next;
                     }
-
                     free(hashHead);
 
                     // If the hashArray slot is empty, set it to NULL
