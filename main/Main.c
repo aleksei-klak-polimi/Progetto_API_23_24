@@ -230,7 +230,7 @@ int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap 
     
 
     while(pendingOrdersNavigator != NULL){
-        recipie = retrieveRecipie(book, pendingOrdersNavigator->el->name);
+        recipie = pendingOrdersNavigator->el->recipie;
 
         pendingOrdersPrev = pendingOrdersNavigator;
         pendingOrdersNavigator = pendingOrdersNavigator->next;
@@ -402,6 +402,7 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
     ch = readOrder(item, time);
 
     recipie *recipie = retrieveRecipie(book, item->name);
+    item->recipie = recipie;
 
     if(recipie == NULL){
         //No matching recipie was found, order refused and cleared from memory

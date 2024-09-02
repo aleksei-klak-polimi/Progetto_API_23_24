@@ -2,9 +2,9 @@
 #include "Orders.h"
 
 struct Courier{
-    int                             frequency;
-    int                             capacity;
-    struct numberedTimedItemList    *ordersHead;
+    int                                 frequency;
+    int                                 capacity;
+    struct numberedTimedLinkedItemList  *ordersHead;
 };
 
 typedef struct Courier                          Courier;

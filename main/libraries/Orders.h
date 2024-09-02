@@ -5,10 +5,25 @@
 #include "Map.h"
 #include "Recipies.h"
 
+struct numberedTimedLinkedItem{
+    char        *name;
+    recipie     *recipie; //35 sec without
+    int         amount;
+    int         time;
+    int         totalWeigth;
+};
+
+
+struct numberedTimedLinkedItemList{
+    struct numberedTimedLinkedItem      *el;
+    struct numberedTimedLinkedItemList  *next;
+};
+
+
 struct numberedTimedItemQueue{
-    char                                *ingredient;
-    struct numberedTimedItemList        *head;
-    struct numberedTimedItemList        *tail;
+    char                                    *ingredient;
+    struct numberedTimedLinkedItemList      *head;
+    struct numberedTimedLinkedItemList      *tail;
 };
 
 
@@ -24,8 +39,8 @@ struct numberedTimedItemQueueMap{
 
 
 
-typedef struct numberedTimedItem                orderedItem;
-typedef struct numberedTimedItemList            orderedItemList;
+typedef struct numberedTimedLinkedItem          orderedItem;
+typedef struct numberedTimedLinkedItemList      orderedItemList;
 typedef struct numberedTimedItemQueue           orderedItemQueue;
 typedef struct numberedTimedItemQueueList       orderedItemQueueList;
 typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
