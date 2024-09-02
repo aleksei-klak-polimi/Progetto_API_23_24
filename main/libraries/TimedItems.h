@@ -4,7 +4,7 @@
 #include "String.h"
 
 struct numberedTimedItem{
-    String  name;
+    char    *name;
     int     amount;
     int     time;
     int     totalWeigth;

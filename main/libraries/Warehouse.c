@@ -1,8 +1,12 @@
 #include "Warehouse.h"
+#include "String.h"
+#include <stdlib.h>
+#include <string.h>
 
 int readSupplies(ingredientLotList *s){
     int ch = 0;
     int i;
+    String buffer;
     ingredientLotList *current = s;
 
     while(ch != '\n' && ch != EOF){
@@ -16,32 +20,33 @@ int readSupplies(ingredientLotList *s){
         //READ INGREDIENT NAME
         i = 0;
         while((ch = fgetc(stdin)) != ' '){
-            el->name[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        el->name[i] = '\0';
+        buffer[i] = '\0';
+
+        el->name = malloc(strlen(buffer)+1);
+        strcpy(el->name, buffer);
 
 
         //READ INGREDIENT AMOUNT
         i = 0;
-        String amount;
         while((ch = fgetc(stdin)) != ' '){
-            amount[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        amount[i] = '\0';
-        el->amount = atoi(amount);
+        buffer[i] = '\0';
+        el->amount = atoi(buffer);
 
 
         //READ INGREDIENT TIME
         i = 0;
-        String time;
         while((ch = fgetc(stdin)) != ' ' && ch != '\n' && ch != EOF){
-            time[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        time[i] = '\0';
-        el->time = atoi(time);
+        buffer[i] = '\0';
+        el->time = atoi(buffer);
 
 
         //UPDATE LIST

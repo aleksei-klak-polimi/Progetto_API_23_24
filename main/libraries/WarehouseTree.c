@@ -7,7 +7,7 @@ warehouseTreeNode *NIL = &NIL_NODE;
 
 
 
-void addIngredientToTree(warehouseTreeNode **d_root, String ingredient, int expiration){
+void addIngredientToTree(warehouseTreeNode **d_root, char *ingredient, int expiration){
     /*  Using double pointer to reference the root because:
         If the tree is still empty then we have to do a malloc
         The malloc assign to the pointer a new memory address
@@ -145,7 +145,7 @@ StringList *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time){
     return returnList;
 }
 
-void removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient){
+void removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, char *ingredient){
     //Finds the node in the tree associated to the time provided, and within the node deletes the
     //specified ingredient, if no ingredients are left afterwards then the node is deleted.
     //Frees from memory the string in the node

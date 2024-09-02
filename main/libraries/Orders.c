@@ -263,27 +263,30 @@ void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
 int readOrder(orderedItem *item, int time){
     int ch = 0;
     int i;
+    String buffer;
 
     while(ch != '\n' && ch != EOF){
 
         //READ RECIPIE NAME
         i = 0;
         while((ch = fgetc(stdin)) != ' '){
-            item->name[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        item->name[i] = '\0';
+        buffer[i] = '\0';
+
+        item->name = malloc(strlen(buffer) +1);
+        strcpy(item->name, buffer);
 
 
         //READ AMOUNT ORDERED
         i = 0;
-        String amount;
         while((ch = fgetc(stdin)) != '\n'){
-            amount[i] = ch;
+            buffer[i] = ch;
             i++;
         }
-        amount[i] = '\0';
-        item->amount = atoi(amount);
+        buffer[i] = '\0';
+        item->amount = atoi(buffer);
 
 
         //ADD INGREDIENT TIME

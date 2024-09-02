@@ -6,7 +6,7 @@
 #include "Recipies.h"
 
 struct numberedTimedItemQueue{
-    String                              ingredient;
+    char                                *ingredient;
     struct numberedTimedItemList        *head;
     struct numberedTimedItemList        *tail;
 };

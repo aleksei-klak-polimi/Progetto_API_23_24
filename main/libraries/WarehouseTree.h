@@ -17,8 +17,8 @@ struct numberedTimedItemListTree{
 typedef struct numberedTimedItemListTree        warehouseTreeNode;
 
 void            treeTransplant(warehouseTreeNode **root, warehouseTreeNode *u, warehouseTreeNode *v);
-void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, String ingredient);
-void            addIngredientToTree(warehouseTreeNode **d_root, String ingredient, int expiration);
+void            removeIngredientFromTreeByTime(warehouseTreeNode **d_root, int time, char *ingredient);
+void            addIngredientToTree(warehouseTreeNode **d_root, char *ingredient, int expiration);
 StringList      *removeNodeFromTreeByTime(warehouseTreeNode **d_root, int time);
 void            deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node);
 void            rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x);
