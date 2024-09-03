@@ -1,3 +1,4 @@
+#include "Recipies.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -74,7 +75,7 @@ void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
     }
 }
 
-int readOrder(orderedItem *item, int time){
+int readOrder(orderedItem *item, int time, recipiesMap *book){
     int ch = 0;
     int i;
     String buffer;
@@ -89,8 +90,8 @@ int readOrder(orderedItem *item, int time){
         }
         buffer[i] = '\0';
 
-        item->name = malloc(strlen(buffer) +1);
-        strcpy(item->name, buffer);
+        //RETRIEVE RECIPIE
+        item->recipie = retrieveRecipie(book, buffer);
 
 
         //READ AMOUNT ORDERED

@@ -41,7 +41,7 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
                 currentCourierLoad += orderNode->el->totalWeigth;
 
                 //removing utilization from recipie book
-                decrementRecipieUtilization(book, orderNode->el->name);
+                orderNode->el->recipie->ordersPending--;
 
                 //Load order inside courier
                 if(courier->ordersHead == NULL || courier->ordersHead->el->totalWeigth < orderNode->el->totalWeigth || (courier->ordersHead->el->totalWeigth == orderNode->el->totalWeigth && courier->ordersHead->el->time > orderNode->el->time)){
@@ -98,7 +98,7 @@ void printCourierContents(Courier *courier){
     }
     else{
         while (currentOrder != NULL) {
-            printf("%d %s %d\n", currentOrder->el->time, currentOrder->el->name, currentOrder->el->amount);
+            printf("%d %s %d\n", currentOrder->el->time, currentOrder->el->recipie->name, currentOrder->el->amount);
             currentOrder = currentOrder->next;
         }
     }

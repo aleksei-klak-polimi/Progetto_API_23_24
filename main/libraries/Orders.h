@@ -7,7 +7,6 @@
 #include "Warehouse.h"
 
 struct numberedTimedLinkedItem{
-    char        *name;
     recipie     *recipie;
     short int   amount;
     int         time;
@@ -48,7 +47,7 @@ typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
 
 
 
-int             readOrder(orderedItem *item, int time);
+int             readOrder(orderedItem *item, int time, recipiesMap *book);
 void            printOrder(orderedItem *item);
 void            removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);

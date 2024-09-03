@@ -186,10 +186,9 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
     int ch;
 
     orderedItem *item = malloc(sizeof(*item));
-    ch = readOrder(item, time);
+    ch = readOrder(item, time, book);
 
-    recipie *recipie = retrieveRecipie(book, item->name);
-    item->recipie = recipie;
+    recipie *recipie = item->recipie;
 
     if(recipie == NULL){
         //No matching recipie was found, order refused and cleared from memory
@@ -293,7 +292,7 @@ void printSupplies(ingredientLot *s, char* ingredientName){
 }
 
 void printOrder(orderedItem *item){
-    printf("Ordered item: %s\n", item->name);
+    printf("Ordered item: %s\n", item->recipie->name);
     printf("Amount: %d\n", item->amount);
     printf("Time of order: %d\n", item->time);
     printf("Total weigth: %d\n", item->totalWeigth);
