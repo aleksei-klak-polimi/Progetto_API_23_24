@@ -1,3 +1,6 @@
+#ifndef WAREHOUSETREE_H_INCLUDED
+#define WAREHOUSETREE_H_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,3 +30,5 @@ void            leftRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 void            rightRotate(warehouseTreeNode **root, warehouseTreeNode *x);
 
 void            printRBTree(warehouseTreeNode *node, int level);
+
+#endif

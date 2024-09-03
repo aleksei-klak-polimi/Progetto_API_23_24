@@ -16,7 +16,6 @@
 //INSTRUCTIONS
 int             addRecipie(recipiesMap *book, warehouseMap *map);
 int             removeRecipie(recipiesMap *book);
-int             resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
 
 
@@ -139,7 +138,8 @@ int main(){
             //printRecipieBook(book);
         }
         else if(strcmp("rifornimento", command) == 0){
-            resupply(time, whMap, root, book, ordersByIngredientsMap, ordersPending, ordersReady);
+            resupplyWarehouse(time, whMap, root);
+            fulfillOrdersPending(whMap, root, ordersPending, ordersReady);
 
             //debug
             //printRBTree(*root, 0);
@@ -174,97 +174,6 @@ int addRecipie(recipiesMap *book, warehouseMap *map){
     int ch;
     recipie *r = malloc(sizeof(*r));
     ch = readRecipie(book, r, map);
-
-    return ch;
-}
-
-int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady){
-    int ch;
-
-    ingredientLotList *lot;
-    lot = malloc(sizeof(*lot));
-
-    ch = readSupplies(lot);
-
-    //Check if there were supplies already expired
-    ingredientLotList *IngredientLotNavigator = lot;
-    ingredientLotList *prev = NULL;
-    while(IngredientLotNavigator != NULL){
-        if(IngredientLotNavigator->el->time <= time){
-            //Supply arrived already expired, remove from list
-            if(prev == NULL){
-                //The expired supply was the head of the lot
-                prev = lot;
-                lot = lot->next;
-                IngredientLotNavigator = lot;
-                free(prev->el);
-                free(prev);
-                prev = NULL;
-            }
-            else{
-                //The expired supply was in the middle of the lot
-                prev->next = IngredientLotNavigator->next;
-                free(IngredientLotNavigator->el);
-                free(IngredientLotNavigator);
-                IngredientLotNavigator = prev->next;
-            }
-        }
-        else{
-            //Supply was not expired, go to next
-            prev = IngredientLotNavigator;
-            IngredientLotNavigator = IngredientLotNavigator->next;
-        }
-    }
-    //Reset the navigator
-    IngredientLotNavigator = lot;
-
-    while(IngredientLotNavigator != NULL){
-        addIngredientToTree(root, IngredientLotNavigator->el->name, IngredientLotNavigator->el->time);
-        addIngredientToMap(map, IngredientLotNavigator->el);
-        IngredientLotNavigator = IngredientLotNavigator->next;
-    }
-
-    orderedItemList *currentOrder = ordersPending->head;
-    orderedItemList *prevOrder = NULL;
-    recipie *recipie = NULL;
-
-    while(currentOrder != NULL){
-        recipie = currentOrder->el->recipie;
-
-        if(isOrderFulfillable(map, recipie, currentOrder->el->amount) == 1){
-
-            removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount);
-
-            addOrderToReady(currentOrder->el, ordersReady);
-            removeOrderFromPending(currentOrder, prevOrder, ordersPending);
-
-
-            if(prevOrder == NULL){
-                currentOrder = ordersPending->head;
-            }
-            else{
-                currentOrder = prevOrder->next;
-            }
-        }
-        else{
-            prevOrder = currentOrder;
-            currentOrder = currentOrder->next;
-        }
-    }
-
-    
-    //Clean the list used to store the lots that were read
-    ingredientLotList *curr = lot;
-    ingredientLotList *next;
-
-    while(curr != NULL){
-        next = curr->next;
-        free(curr);
-        curr = next;
-    }
-
-
-    printf("rifornito\n");
 
     return ch;
 }

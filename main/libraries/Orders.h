@@ -4,6 +4,7 @@
 #include "TimedItems.h"
 #include "Map.h"
 #include "Recipies.h"
+#include "Warehouse.h"
 
 struct numberedTimedLinkedItem{
     char        *name;
@@ -53,6 +54,7 @@ void            addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *
 void            removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 void            removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);
+void            fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 
 
 #endif

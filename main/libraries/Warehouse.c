@@ -3,30 +3,29 @@
 #include <stdlib.h>
 #include <string.h>
 
-int readSupplies(ingredientLotList *s){
+int resupplyWarehouse(int time, warehouseMap *map, warehouseTreeNode **root){
     int ch = 0;
     int i;
+    String nameBuffer;
     String buffer;
-    ingredientLotList *current = s;
+    int amount;
+    int expiration;
+    ingredientLot *s;
 
     while(ch != '\n' && ch != EOF){
 
 
         //ALLOCATE ELEMENT
-        ingredientLot *el;
-        el = malloc(sizeof(*el));
+        s = malloc(sizeof(*s));
 
 
         //READ INGREDIENT NAME
         i = 0;
         while((ch = fgetc(stdin)) != ' '){
-            buffer[i] = ch;
+            nameBuffer[i] = ch;
             i++;
         }
-        buffer[i] = '\0';
-
-        el->name = malloc(strlen(buffer)+1);
-        strcpy(el->name, buffer);
+        nameBuffer[i] = '\0';
 
 
         //READ INGREDIENT AMOUNT
@@ -36,7 +35,7 @@ int readSupplies(ingredientLotList *s){
             i++;
         }
         buffer[i] = '\0';
-        el->amount = atoi(buffer);
+        amount = atoi(buffer);
 
 
         //READ INGREDIENT TIME
@@ -46,19 +45,22 @@ int readSupplies(ingredientLotList *s){
             i++;
         }
         buffer[i] = '\0';
-        el->time = atoi(buffer);
+        expiration = atoi(buffer);
 
 
-        //UPDATE LIST
-        current->el = el;
-        if(ch == ' '){
-            current->next = malloc(sizeof(*current));
-            current = current->next;
-        }
-        else{
-            current->next = NULL;
+        if(expiration > time){
+            s = malloc(sizeof(*s));
+            s->time = expiration;
+            s->amount = amount;
+            s->name = malloc(strlen(nameBuffer)+1);
+            strcpy(s->name, nameBuffer);
+
+
+            addIngredientToTree(root, s->name, s->time);
+            addIngredientToMap(map, s);
         }
     }
+    printf("rifornito\n");
 
     return ch;
 }

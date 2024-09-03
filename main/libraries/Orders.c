@@ -273,3 +273,33 @@ int readOrder(orderedItem *item, int time){
     }
     return ch;
 }
+
+void fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady){
+    orderedItemList *currentOrder = ordersPending->head;
+    orderedItemList *prevOrder = NULL;
+    recipie *recipie = NULL;
+
+    while(currentOrder != NULL){
+        recipie = currentOrder->el->recipie;
+
+        if(isOrderFulfillable(map, recipie, currentOrder->el->amount) == 1){
+
+            removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount);
+
+            addOrderToReady(currentOrder->el, ordersReady);
+            removeOrderFromPending(currentOrder, prevOrder, ordersPending);
+
+
+            if(prevOrder == NULL){
+                currentOrder = ordersPending->head;
+            }
+            else{
+                currentOrder = prevOrder->next;
+            }
+        }
+        else{
+            prevOrder = currentOrder;
+            currentOrder = currentOrder->next;
+        }
+    }
+}
