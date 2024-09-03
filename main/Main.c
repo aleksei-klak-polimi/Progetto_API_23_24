@@ -224,20 +224,28 @@ int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap 
         IngredientLotNavigator = IngredientLotNavigator->next;
     }
 
-    orderedItemList *pendingOrdersNavigator = ordersPending->head;
-    orderedItemList *pendingOrdersPrev = NULL;
+    orderedItemList *currentOrder = ordersPending->head;
+    orderedItemList *prevOrder = NULL;
     recipie *recipie = NULL;
-    
 
-    while(pendingOrdersNavigator != NULL){
-        recipie = pendingOrdersNavigator->el->recipie;
+    while(currentOrder != NULL){
+        recipie = currentOrder->el->recipie;
 
-        pendingOrdersPrev = pendingOrdersNavigator;
-        pendingOrdersNavigator = pendingOrdersNavigator->next;
+        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount) == 1){
+            addOrderToReady(currentOrder->el, ordersReady);
+            removeOrderFromPending(currentOrder, prevOrder, ordersPending);
 
-        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, pendingOrdersPrev->el->amount) == 1){
-            addOrderToReady(pendingOrdersPrev->el, ordersReady);
-            removeOrderFromPending(pendingOrdersPrev->el, ordersPending);
+
+            if(prevOrder == NULL){
+                currentOrder = ordersPending->head;
+            }
+            else{
+                currentOrder = prevOrder->next;
+            }
+        }
+        else{
+            prevOrder = currentOrder;
+            currentOrder = currentOrder->next;
         }
     }
 

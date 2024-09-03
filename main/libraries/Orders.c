@@ -170,54 +170,31 @@ void removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *orders
     }
 }
 
-void removeOrderFromPending(orderedItem *item, orderedItemQueue *ordersWaiting){
-    orderedItemList *current = ordersWaiting->head;
-    orderedItemList *prev = NULL;
-
-    int breaker = 0;
-    orderedItem *storedItem;
-    while(breaker == 0){
-        storedItem = current->el;
-        if(strcmp(storedItem->name, item->name) == 0 && storedItem->amount == item->amount && storedItem->time == item->time){
-            //Item found
-            breaker = 1;
-            if(prev == NULL){
-                //item is the head of the queue
-                if(current->next == NULL){
-                    //item is the only one in queue
-                    ordersWaiting->head = NULL;
-                    ordersWaiting->tail = NULL;
-                }
-                else{
-                    //Item is head but not the only one
-                    ordersWaiting->head = current->next;
-                }
-            }
-            else{
-                //item is not the head of the queue
-                if(ordersWaiting->tail == current){
-                    //item is the tail
-                    prev->next = NULL;
-                    ordersWaiting->tail = prev;
-                }
-                else{
-                    //item is in the middle of the queue
-                    prev->next = current->next;
-                }
-            }
-
-            free(current);
+void removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting){
+    if(prev == NULL){
+        //item to remove is the head of the queue
+        if(current->next == NULL){
+            //item is the only one in the queue
+            ordersWaiting->head = NULL;
+            ordersWaiting->tail = NULL;
         }
         else{
-            if(current->next == NULL){
-                breaker = 1;
-            }
-            else{
-                prev = current;
-                current = current->next;
-            }
+            //replace the head of the queue
+            ordersWaiting->head = ordersWaiting->head->next;
         }
     }
+    else if(current->next == NULL){
+        //item to remove is tail
+        ordersWaiting->tail = prev;
+        prev->next = NULL;
+    }
+    else{
+        //item is in the middle of the queue
+        prev->next = current->next;
+    }
+
+    //todo maybe instead of free, transplant directly into ready queue
+    free(current);
 }
 
 void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
