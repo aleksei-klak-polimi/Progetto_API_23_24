@@ -25,10 +25,10 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
     int hash = sdbm_hash(r->name);
     int ingrHash;
 
-    recipiesList *hashHead = book->hashArray[hash];
+    recipie *hashHead = book->hashArray[hash];
 
     while(hashHead != NULL){
-        if(strcmp(hashHead->el->name, r->name) == 0){
+        if(strcmp(hashHead->name, r->name) == 0){
             duplicate = 1;
             break;
         }
@@ -152,12 +152,10 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
     r->weight = totalWeigth;
 
     //Insert recipie into map
-    hashHead = malloc(sizeof(*hashHead));
-    hashHead->el = r;
-    hashHead->ordersPending = 0;
+    r->ordersPending = 0;
 
-    hashHead->next = book->hashArray[hash];
-    book->hashArray[hash] = hashHead;
+    r->next = book->hashArray[hash];
+    book->hashArray[hash] = r;
 
     printf("aggiunta\n");
 
@@ -190,11 +188,11 @@ int removeRecipie(recipiesMap *book){
         //IF MAP CONTAINS HASH CHECK THE LIST FOR MATCHES
         int found = 0;
         int allowed = 0;
-        recipiesList *prevHashHead = NULL;
-        recipiesList *currHashHead = book->hashArray[hash];
+        recipie *prevHashHead = NULL;
+        recipie *currHashHead = book->hashArray[hash];
 
         //CHECK IF THE HEAD OF THE LIST IS THE MATCH
-        if(strcmp(book->hashArray[hash]->el->name, name) == 0){
+        if(strcmp(book->hashArray[hash]->name, name) == 0){
             found = 1;
             if(book->hashArray[hash]->ordersPending == 0){
                 allowed = 1;
@@ -210,7 +208,7 @@ int removeRecipie(recipiesMap *book){
             //To keep the list linked, we iterate through the list using prev and see if prev->next is the match
             //this way we can link together the remainder of the list after we cut out prev->next
             while(currHashHead != NULL){
-                if(strcmp(currHashHead->el->name, name) == 0){
+                if(strcmp(currHashHead->name, name) == 0){
                     found = 1;
                     if(currHashHead->ordersPending == 0){
                         allowed = 1;
@@ -232,7 +230,7 @@ int removeRecipie(recipiesMap *book){
         }
         else if(allowed == 1){
             //CLEARING MEMORY
-            ingredientList *ingredientCurr = currHashHead->el->head;
+            ingredientList *ingredientCurr = currHashHead->head;
             ingredientList *ingredientPrev = NULL;
 
             while(ingredientCurr != NULL){
@@ -243,7 +241,6 @@ int removeRecipie(recipiesMap *book){
             }
 
             //Clear recipie and hashHead from memory
-            free(currHashHead->el);
             free(currHashHead);
 
 
@@ -263,11 +260,11 @@ recipie *retrieveRecipie(recipiesMap *book, String name){
     //Returns null otherwise
 
     int hash = sdbm_hash(name);
-    recipiesList *hashHead = book->hashArray[hash];
+    recipie *hashHead = book->hashArray[hash];
 
     while(hashHead != NULL){
-        if(strcmp(hashHead->el->name, name) == 0){
-            return hashHead->el;
+        if(strcmp(hashHead->name, name) == 0){
+            return hashHead;
         }
         else{
             hashHead = hashHead->next;
@@ -279,10 +276,10 @@ recipie *retrieveRecipie(recipiesMap *book, String name){
 
 void decrementRecipieUtilization(recipiesMap *book, String name){
     int hash = sdbm_hash(name);
-    recipiesList *hashHead = book->hashArray[hash];
+    recipie *hashHead = book->hashArray[hash];
 
     while(hashHead != NULL){
-        if(strcmp(hashHead->el->name, name) == 0){
+        if(strcmp(hashHead->name, name) == 0){
             hashHead->ordersPending--;
             break;
         }
@@ -294,10 +291,10 @@ void decrementRecipieUtilization(recipiesMap *book, String name){
 
 void incrementRecipieUtilization(recipiesMap *book, String name){
     int hash = sdbm_hash(name);
-    recipiesList *hashHead = book->hashArray[hash];
+    recipie *hashHead = book->hashArray[hash];
 
     while(hashHead != NULL){
-        if(strcmp(hashHead->el->name, name) == 0){
+        if(strcmp(hashHead->name, name) == 0){
             hashHead->ordersPending++;
             break;
         }

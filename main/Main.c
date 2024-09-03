@@ -259,10 +259,10 @@ void printRecipieBook(recipiesMap *book){
     int i;
     for(i = 0; i < HASHMAPSIZE; i++){
         if(book->hashArray[i] != NULL){
-            recipiesList *node = book->hashArray[i];
+            recipie *node = book->hashArray[i];
 
             while(node != NULL){
-                printRecipie(node->el);
+                printRecipie(node);
                 node = node->next;
             }
         }

@@ -18,21 +18,16 @@ struct numberedItemList{
 
 
 struct namedNumberedItemList{
-    char                        *name;
-    struct numberedItemList     *head;
-    int                         weight;
-};
-
-
-struct namedNumberedItemListList{
     int                                 ordersPending;
-    struct namedNumberedItemList        *el;
-    struct namedNumberedItemListList    *next;
+    char                                *name;
+    struct numberedItemList             *head;
+    int                                 weight;
+    struct namedNumberedItemList        *next;
 };
 
 
 struct namedNumberedItemListListMap{
-    struct namedNumberedItemListList   *hashArray[HASHMAPSIZE];
+    struct namedNumberedItemList        *hashArray[HASHMAPSIZE];
 };
 
 
@@ -42,7 +37,6 @@ struct namedNumberedItemListListMap{
 typedef struct numberedItem                     ingredient;
 typedef struct numberedItemList                 ingredientList;
 typedef struct namedNumberedItemList            recipie;
-typedef struct namedNumberedItemListList        recipiesList;
 typedef struct namedNumberedItemListListMap     recipiesMap;
 
 
