@@ -1,9 +1,10 @@
 #include "WarehouseMap.h"
+#include <stdio.h>
+#include <string.h>
 
 void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient){
     int hash = sdbm_hash(ingredient);
     ingredientLotListList *hashHead = map->hashArray[hash];
-    ingredientLotListList *prevHashHead = NULL;
     ingredientLotList *ingredientHead = NULL;
     ingredientLotList *prevIngredientHead = NULL;
 
@@ -12,7 +13,6 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
             ingredientHead = hashHead->el;
         }
         else{
-            prevHashHead = hashHead;
             hashHead = hashHead->next;
         }
     }
@@ -21,28 +21,18 @@ void removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredien
         prevIngredientHead = ingredientHead;
         ingredientHead = ingredientHead->next;
     }
-    removeNodeFromIngredientMap(map, hash, hashHead, prevHashHead, ingredientHead, prevIngredientHead);
+    removeNodeFromIngredientMap(map, hashHead, ingredientHead, prevIngredientHead);
 }
 
-void removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead){
+void removeNodeFromIngredientMap(warehouseMap *map, ingredientLotListList *hashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead){
     hashHead->totalAmount -= ingredientHead->el->amount;
     if(prevIngredientHead != NULL){
         prevIngredientHead->next = ingredientHead->next;
     }
-    else if(ingredientHead->next != NULL){
+    else{
         hashHead->el = ingredientHead->next;
     }
-    else{
-        //Ingredient removed was the only ingredient in the list
-        //Cleaning ListList
-        if(prevHashHead != NULL){
-            prevHashHead->next = hashHead->next;
-        }
-        else{
-            map->hashArray[hash] = hashHead->next;
-        }
-        free(hashHead);
-    }
+
     free(ingredientHead->el);
     free(ingredientHead);
 }
@@ -58,6 +48,8 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
         hashHead->el = ingredientHead;
         hashHead->totalAmount = s->amount;
         hashHead->next = NULL;
+        hashHead->ingredientName = malloc(strlen(s->name)+1);
+        strcpy(hashHead->ingredientName, s->name);
 
         ingredientHead->el = s;
         ingredientHead->next = NULL;
@@ -66,83 +58,71 @@ void addIngredientToMap(warehouseMap *map, ingredientLot*s){
     }
     else{
         //The hashHead already existed, locate ingredientHead
-        int ingredientHeadFound = 0;
-        int endOfList = 0;
         ingredientLotListList *hashHead = map->hashArray[hash];
-        ingredientLotList *ingredientHead;
 
-        do{
-            if(strcmp(hashHead->el->el->name, s->name) == 0){
-                ingredientHead = hashHead->el;
-                ingredientHeadFound = 1;
+
+        while(hashHead != NULL){
+            if(strcmp(hashHead->ingredientName, s->name) == 0){
+                //current hash head is the correct one
+                break;
             }
-            else if(hashHead->next != NULL){
+            else if(hashHead->next == NULL){
+                //No hashHead match was found, appending new hashead at the end of the bucket
+                hashHead->next = malloc(sizeof(*hashHead));
                 hashHead = hashHead->next;
-            }
-            else{
-                endOfList = 1;
-            }
-        }
-        while(endOfList == 0 && ingredientHeadFound == 0);
 
-        if(ingredientHeadFound == 0){
-            hashHead->next = malloc(sizeof(*hashHead));
+                hashHead->totalAmount = 0;
+                hashHead->next = NULL;
+                hashHead->el = NULL;
+                hashHead->ingredientName = malloc(strlen(s->name)+1);
+                strcpy(hashHead->ingredientName, s->name);
+                break;
+            }
             hashHead = hashHead->next;
+        }
+        
 
-            ingredientHead = malloc(sizeof(*ingredientHead));
 
-            hashHead->el = ingredientHead;
-            hashHead->totalAmount = s->amount;
-            hashHead->next = NULL;
+        //We are now necessarily inside the correct hashHead, add ingredient to the list
 
-            ingredientHead->el = s;
-            ingredientHead->next = NULL;
+        hashHead->totalAmount += s->amount;
+
+        if(hashHead->el == NULL){
+            //The ingredient lot we are inserting is the first one for this list
+            ingredientLotList *newNode = malloc(sizeof(*newNode));
+            hashHead->el = newNode;
+            hashHead->el->next = NULL;
+            hashHead->el->el = s;
         }
         else{
-            //HashHead points to the beginning of the correct ingredientHead
+            ingredientLotList *ingredientNavigator = hashHead->el;
             //Need to locate correct position inside ingredientList
-            hashHead->totalAmount += s->amount;
-            ingredientLotList *currentIngredientLot = hashHead->el;
-
-            if(currentIngredientLot->el->time == s->time){
-                //A lot with same expiration is at the head of the list
-
-                //Replace duplicate ingredient lot with the one passed as parameter
-                s->amount += currentIngredientLot->el->amount;
-                free(currentIngredientLot->el);
-                currentIngredientLot->el = s;
-            }
-            else if(currentIngredientLot->el->time > s->time){
-                //Head of ingredients list is greater than new ingredient lot
-                hashHead->el = malloc(sizeof(*currentIngredientLot));
+            if(ingredientNavigator->el->time > s->time){
+                //earliest ingredient in list is still later than s, replace list head
+                ingredientLotList *newNode = malloc(sizeof(*newNode));
+                hashHead->el = newNode;
+                hashHead->el->next = ingredientNavigator;
                 hashHead->el->el = s;
-                hashHead->el->next = currentIngredientLot;
             }
             else{
-                //Navigate the ingredient list and stop on the first node where
-                //next node expires later than s
+                while(ingredientNavigator != NULL){
+                    if(ingredientNavigator->el->time == s->time){
+                        s->amount += ingredientNavigator->el->amount;
+                        free(ingredientNavigator->el);
+                        ingredientNavigator->el = s;
 
-                
-                int nodeFound = 0;
-                while(nodeFound == 0){
-                    if(currentIngredientLot->el->time == s->time){
-                        nodeFound = 1;
-
-                        //Replace duplicate ingredient lot with the one passed as parameter
-                        s->amount += currentIngredientLot->el->amount;
-                        free(currentIngredientLot->el);
-                        currentIngredientLot->el = s;
+                        break;
                     }
-                    else if(currentIngredientLot->el->time < s->time && (currentIngredientLot->next == NULL || currentIngredientLot->next->el->time > s->time)){
-                        nodeFound = 1;
+                    else if(ingredientNavigator->el->time < s->time && (ingredientNavigator->next == NULL || ingredientNavigator->next->el->time > s->time)){
                         ingredientLotList *newNode = malloc(sizeof(*newNode));
                         newNode->el = s;
-                        newNode->next = currentIngredientLot->next;
-                        currentIngredientLot->next = newNode;
+                        newNode->next = ingredientNavigator->next;
+                        ingredientNavigator->next = newNode;
+
+                        break;
                     }
-                    else{
-                        currentIngredientLot = currentIngredientLot->next;
-                    }
+
+                    ingredientNavigator = ingredientNavigator->next;
                 }
             }
         }

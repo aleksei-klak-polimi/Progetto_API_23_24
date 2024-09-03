@@ -19,6 +19,7 @@ struct numberedTimedItemList{
 
 
 struct numberedTimedItemListList{
+    char                                *ingredientName;
     int                                 totalAmount;
     struct numberedTimedItemList        *el;
     struct numberedTimedItemListList    *next;

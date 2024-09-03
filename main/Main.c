@@ -14,7 +14,7 @@
 
 //METHOD DECLARATION
 //INSTRUCTIONS
-int             addRecipie(recipiesMap *book);
+int             addRecipie(recipiesMap *book, warehouseMap *map);
 int             removeRecipie(recipiesMap *book);
 int             resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueueMap *ordersByIngredient, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
@@ -127,7 +127,7 @@ int main(){
 
         //INTERPRET THE COMMAND
         if(strcmp("aggiungi_ricetta", command) == 0){
-            addRecipie(book);
+            addRecipie(book, whMap);
 
             //debug
             //printRecipieBook(book);
@@ -167,13 +167,13 @@ int main(){
 
 
 
-int addRecipie(recipiesMap *book){
+int addRecipie(recipiesMap *book, warehouseMap *map){
     //calls function to read recipie from input buffer
     //then calls function to add recipie to recipie book
     //malloc for recipie.
     int ch;
     recipie *r = malloc(sizeof(*r));
-    ch = readRecipie(book, r);
+    ch = readRecipie(book, r, map);
 
     return ch;
 }

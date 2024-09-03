@@ -17,4 +17,4 @@ typedef struct numberedTimedItemListMap         warehouseMap;
 
 void            addIngredientToMap(warehouseMap *map, ingredientLot*s);
 void            removeIngredientFromMapByTime(warehouseMap *map, int time, String ingredient);
-void            removeNodeFromIngredientMap(warehouseMap *map, int hash, ingredientLotListList *hashHead, ingredientLotListList *prevHashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);
+void            removeNodeFromIngredientMap(warehouseMap *map, ingredientLotListList *hashHead, ingredientLotList *ingredientHead, ingredientLotList *prevIngredientHead);

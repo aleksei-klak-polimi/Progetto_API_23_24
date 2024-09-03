@@ -4,7 +4,7 @@
 
 #include "Recipies.h"
 
-int readRecipie(recipiesMap *book, recipie *r){
+int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *whMap){
     int ch;
     int i = 0;
     char buffer[256];
@@ -23,6 +23,7 @@ int readRecipie(recipiesMap *book, recipie *r){
     //Check if recipie is already in the map before reading the rest of the ingredients
     int duplicate = 0;
     int hash = sdbm_hash(r->name);
+    int ingrHash;
 
     recipiesList *hashHead = book->hashArray[hash];
 
@@ -75,6 +76,49 @@ int readRecipie(recipiesMap *book, recipie *r){
 
         ingr->name = malloc(strlen(buffer)+1);
         strcpy(ingr->name, buffer);
+
+
+        //LINK INGREDIENT HEAD FROM MAP TO RECIPIE
+        ingr->ingredientHead = NULL;
+        ingrHash = sdbm_hash(ingr->name);
+        struct numberedTimedItemListList *hashHead = NULL;
+
+        if(whMap->hashArray[ingrHash] == NULL){
+            hashHead = malloc(sizeof(*hashHead));
+            hashHead->totalAmount = 0;
+            hashHead->next = NULL;
+            hashHead->el = NULL;
+            hashHead->ingredientName = malloc(strlen(buffer)+1);
+            strcpy(hashHead->ingredientName, ingr->name);
+
+            ingr->ingredientHead = hashHead;
+            whMap->hashArray[ingrHash] = hashHead;
+        }
+        else{
+            hashHead = whMap->hashArray[ingrHash];
+
+            while(ingr->ingredientHead == NULL){
+                if(strcmp(hashHead->ingredientName, buffer) == 0){
+                    ingr->ingredientHead = hashHead;
+                }
+                else if(hashHead->next == NULL){
+                    hashHead->next = malloc(sizeof(*hashHead));
+                    hashHead = hashHead->next;
+
+                    hashHead->totalAmount = 0;
+                    hashHead->next = NULL;
+                    hashHead->el = NULL;
+                    hashHead->ingredientName = malloc(strlen(buffer)+1);
+                    strcpy(hashHead->ingredientName, buffer);
+
+                    ingr->ingredientHead = hashHead;
+                }
+
+                hashHead = hashHead->next;
+            }
+        }
+
+
 
 
 

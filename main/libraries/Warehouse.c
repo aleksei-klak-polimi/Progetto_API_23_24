@@ -83,34 +83,16 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
     //Check if there are enough ingredients for recipie
     ingredientList *firstIngredientNode = recipie->head;
     ingredientList *currentIngredientNode = firstIngredientNode;
-    ingredient *ingredient;
-
-    int hash;
 
     ingredientLotListList *hashHead;
 
     //check for each ingredient if there are enough in storage
     while(currentIngredientNode != NULL){
-        ingredient = currentIngredientNode->el;
-        hash = sdbm_hash(ingredient->name);
 
-        hashHead = map->hashArray[hash];
-
-        int breaker = 0;
-        while(breaker == 0){
-            if(hashHead == NULL){
-                return 0;
-            }
-            if(strcmp(hashHead->el->el->name, ingredient->name) == 0){
-                breaker = 1;
-                if(hashHead->totalAmount < (ingredient->amount *quantity)){
-                    return 0;
-                }
-            }
-            else{
-                hashHead = hashHead->next;
-            }
+        if(currentIngredientNode->el->amount * quantity > currentIngredientNode->el->ingredientHead->totalAmount){
+            return 0;
         }
+
         currentIngredientNode = currentIngredientNode->next;
     }
     //If function has not returned at this point then each ingredient of the recipie is found in the warehouse with enough amount
@@ -119,29 +101,13 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
     currentIngredientNode = firstIngredientNode;
     int totalAmount;
 
-    ingredientLotListList *prevHashHead = NULL;
     ingredientLotList *ingredientHead;
     ingredientLotList *prevIngredientHead = NULL;
 
     while(currentIngredientNode != NULL){
         totalAmount = currentIngredientNode->el->amount * quantity;
 
-        //Locate the hashHead
-        hash = sdbm_hash(currentIngredientNode->el->name);
-        hashHead = map->hashArray[hash];
-        prevHashHead = NULL;
-        ingredient = currentIngredientNode->el;
-
-        int breaker = 0;
-        while(breaker == 0){
-            if(strcmp(hashHead->el->el->name, ingredient->name) == 0){
-                breaker = 1;
-            }
-            else{
-                prevHashHead = hashHead;
-                hashHead = hashHead->next;
-                }
-        }
+        hashHead = currentIngredientNode->el->ingredientHead;
         //HashHead located
         ingredientHead = hashHead->el;
         prevIngredientHead = NULL;
@@ -160,7 +126,7 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
 
                 //Delete prev node from tree and Map
                 removeIngredientFromTreeByTime(root, prevIngredientHead->el->time, prevIngredientHead->el->name);
-                removeNodeFromIngredientMap(map, hash, hashHead, prevHashHead, prevIngredientHead, NULL);
+                removeNodeFromIngredientMap(map, hashHead, prevIngredientHead, NULL);
             }
             else{
                 //Ingredients will be left over so no need to delete the node, only decrease the amount in hashHead
