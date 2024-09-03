@@ -16,4 +16,11 @@ struct numberedTimedItemList{
     struct numberedTimedItemList    *next;
 };
 
+
+struct numberedTimedItemListList{
+    int                                 totalAmount;
+    struct numberedTimedItemList        *el;
+    struct numberedTimedItemListList    *next;
+};
+
 #endif

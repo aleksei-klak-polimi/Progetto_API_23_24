@@ -6,12 +6,6 @@
 #include "TimedItems.h"
 #include "Map.h"
 
-struct numberedTimedItemListList{
-    int                                 totalAmount;
-    struct numberedTimedItemList        *el;
-    struct numberedTimedItemListList    *next;
-};
-
 struct numberedTimedItemListMap{
     struct numberedTimedItemListList *hashArray[HASHMAPSIZE];
 };
