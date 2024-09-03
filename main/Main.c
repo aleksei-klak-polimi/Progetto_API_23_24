@@ -20,7 +20,7 @@ int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *
 
 
 //DEBUG PRINTS
-void            printSupplies(ingredientLotList *s);
+void            printSupplies(ingredientLot *s, char* ingredientName);
 void            printRBTree(warehouseTreeNode *node, int level);
 void            printSpaces(int count);
 void            printRecipie(recipie *r);
@@ -282,12 +282,12 @@ void printRecipie(recipie *r){
     }
 }
 
-void printSupplies(ingredientLotList *s){
+void printSupplies(ingredientLot *s, char* ingredientName){
     printf("\nLot:\n");
     
-    ingredientLotList *ingr = s;
+    ingredientLot *ingr = s;
     while(ingr != NULL){
-        printf("Ingredient: %s\nAmount: %d\nExpiration: %d\n", ingr->el->name, ingr->el->amount, ingr->el->time);
+        printf("Ingredient: %s\nAmount: %d\nExpiration: %d\n", ingredientName, ingr->amount, ingr->time);
         ingr = ingr->next;
     }
 }
@@ -387,7 +387,7 @@ void printIngredientMap(warehouseMap *map){
                 if (hashHead->el == NULL) {
                     printf("NULL");
                 } else {
-                    printf("Ingredient: %s, amount: %d", hashHead->el->el->name, hashHead->totalAmount);
+                    printf("Ingredient: %s, amount: %d", hashHead->ingredientName, hashHead->totalAmount);
                 }
 
                 printf("\n");  // Add a newline for readability

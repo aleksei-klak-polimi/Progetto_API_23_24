@@ -4,10 +4,11 @@
 #include "String.h"
 #include "Map.h"
 #include "TimedItems.h"
+#include "WarehouseMap.h"
 
 struct numberedItem{
     int                                 amount;
-    struct numberedTimedItemListList    *ingredientHead;
+    struct numberedTimedLotList         *ingredientHead;
     struct numberedItem                 *next;
 };
 
@@ -36,7 +37,7 @@ typedef struct namedNumberedItemListListMap     recipiesMap;
 
 
 //Parsing function
-int             readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *whMap);
+int             readRecipie(recipiesMap *book, recipie *r, struct numberedTimedLotListMap *whMap);
 
 void            deleteRecipie(recipiesMap book, String name);
 void            decrementRecipieUtilization(recipiesMap *book, String name);

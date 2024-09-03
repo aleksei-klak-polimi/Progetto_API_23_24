@@ -52,12 +52,10 @@ int resupplyWarehouse(int time, warehouseMap *map, warehouseTreeNode **root){
             s = malloc(sizeof(*s));
             s->time = expiration;
             s->amount = amount;
-            s->name = malloc(strlen(nameBuffer)+1);
-            strcpy(s->name, nameBuffer);
 
 
-            addIngredientToTree(root, s->name, s->time);
-            addIngredientToMap(map, s);
+            addIngredientToTree(root, nameBuffer, s->time);
+            addIngredientToMap(map, s, nameBuffer);
         }
     }
     printf("rifornito\n");
@@ -87,8 +85,8 @@ void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMa
     currentIngredientNode = firstIngredientNode;
     int totalAmount;
 
-    ingredientLotList *ingredientHead;
-    ingredientLotList *prevIngredientHead = NULL;
+    ingredientLot *ingredientHead;
+    ingredientLot *prevIngredientHead = NULL;
 
     while(currentIngredientNode != NULL){
         totalAmount = currentIngredientNode->amount * quantity;
@@ -100,25 +98,25 @@ void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMa
 
         //Trim the list of Lots
         while(totalAmount > 0){
-            if(totalAmount >= ingredientHead->el->amount){
+            if(totalAmount >= ingredientHead->amount){
                 //Need to delete the whole node as all ingredients are used
 
                 //Decrease remaining amount
-                totalAmount -= ingredientHead->el->amount;
+                totalAmount -= ingredientHead->amount;
 
                 //Go to next node
                 prevIngredientHead = ingredientHead;
                 ingredientHead = ingredientHead->next;
 
                 //Delete prev node from tree and Map
-                removeIngredientFromTreeByTime(root, prevIngredientHead->el->time, prevIngredientHead->el->name);
+                removeIngredientFromTreeByTime(root, prevIngredientHead->time, hashHead->ingredientName);
                 removeNodeFromIngredientMap(map, hashHead, prevIngredientHead, NULL);
             }
             else{
                 //Ingredients will be left over so no need to delete the node, only decrease the amount in hashHead
                 hashHead->totalAmount -= totalAmount;
 
-                ingredientHead->el->amount -= totalAmount;
+                ingredientHead->amount -= totalAmount;
 
 
                 totalAmount = 0;

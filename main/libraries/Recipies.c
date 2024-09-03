@@ -4,7 +4,7 @@
 
 #include "Recipies.h"
 
-int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *whMap){
+int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedLotListMap *whMap){
     int ch;
     int i = 0;
     char buffer[256];
@@ -76,7 +76,7 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
         //LINK INGREDIENT HEAD FROM MAP TO RECIPIE
         ingr->ingredientHead = NULL;
         ingrHash = sdbm_hash(buffer);
-        struct numberedTimedItemListList *hashHead = NULL;
+        ingredientLotListList *hashHead = NULL;
 
         if(whMap->hashArray[ingrHash] == NULL){
             hashHead = malloc(sizeof(*hashHead));
