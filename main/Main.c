@@ -276,7 +276,7 @@ void printRecipie(recipie *r){
 
     int i = 0;
     while(ingr != 0){
-        printf("Ingredient %d: %s, %d\n", i, ingr->el->name, ingr->el->amount);
+        printf("Ingredient %d: %s, %d\n", i, ingr->el->ingredientHead->ingredientName, ingr->el->amount);
         ingr = ingr->next;
         i++;
     }

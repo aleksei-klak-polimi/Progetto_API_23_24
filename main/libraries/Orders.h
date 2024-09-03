@@ -50,7 +50,6 @@ typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
 
 int             readOrder(orderedItem *item, int time);
 void            printOrder(orderedItem *item);
-void            addOrderToIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 void            removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 void            removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);

@@ -6,7 +6,6 @@
 #include "TimedItems.h"
 
 struct numberedItem{
-    char                                *name;
     int                                 amount;
     struct numberedTimedItemListList    *ingredientHead;
 };

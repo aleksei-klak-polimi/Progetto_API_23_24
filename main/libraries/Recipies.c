@@ -74,13 +74,10 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
         }
         buffer[i] = '\0';
 
-        ingr->name = malloc(strlen(buffer)+1);
-        strcpy(ingr->name, buffer);
-
 
         //LINK INGREDIENT HEAD FROM MAP TO RECIPIE
         ingr->ingredientHead = NULL;
-        ingrHash = sdbm_hash(ingr->name);
+        ingrHash = sdbm_hash(buffer);
         struct numberedTimedItemListList *hashHead = NULL;
 
         if(whMap->hashArray[ingrHash] == NULL){
@@ -89,7 +86,7 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
             hashHead->next = NULL;
             hashHead->el = NULL;
             hashHead->ingredientName = malloc(strlen(buffer)+1);
-            strcpy(hashHead->ingredientName, ingr->name);
+            strcpy(hashHead->ingredientName, buffer);
 
             ingr->ingredientHead = hashHead;
             whMap->hashArray[ingrHash] = hashHead;
