@@ -76,27 +76,11 @@ void removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap
     }
 }
 
-int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity){
-    //Returns 0 if there were less ingredients available than specified amount and nothing is deleted
-    //Returns 1 if the ingredients were successfully removed
-
-    //Check if there are enough ingredients for recipie
+void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity){
     ingredientList *firstIngredientNode = recipie->head;
     ingredientList *currentIngredientNode = firstIngredientNode;
 
     ingredientLotListList *hashHead;
-
-    //check for each ingredient if there are enough in storage
-    while(currentIngredientNode != NULL){
-
-        if(currentIngredientNode->el->amount * quantity > currentIngredientNode->el->ingredientHead->totalAmount){
-            return 0;
-        }
-
-        currentIngredientNode = currentIngredientNode->next;
-    }
-    //If function has not returned at this point then each ingredient of the recipie is found in the warehouse with enough amount
-
 
     currentIngredientNode = firstIngredientNode;
     int totalAmount;
@@ -141,6 +125,26 @@ int removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap
 
         currentIngredientNode = currentIngredientNode->next;
     }
+}
+
+int isOrderFulfillable(warehouseMap *map, recipie *recipie, int quantity){
+    //Returns 0 if there were less ingredients available than specified amount and nothing is deleted
+    //Returns 1 if the ingredients were successfully removed
+
+    //Check if there are enough ingredients for recipie
+    ingredientList *firstIngredientNode = recipie->head;
+    ingredientList *currentIngredientNode = firstIngredientNode;
+
+    //check for each ingredient if there are enough in storage
+    while(currentIngredientNode != NULL){
+
+        if(currentIngredientNode->el->amount * quantity > currentIngredientNode->el->ingredientHead->totalAmount){
+            return 0;
+        }
+
+        currentIngredientNode = currentIngredientNode->next;
+    }
+
     return 1;
 }
 

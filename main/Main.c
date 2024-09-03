@@ -231,7 +231,10 @@ int resupply(int time, warehouseMap *map, warehouseTreeNode **root, recipiesMap 
     while(currentOrder != NULL){
         recipie = currentOrder->el->recipie;
 
-        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount) == 1){
+        if(isOrderFulfillable(map, recipie, currentOrder->el->amount) == 1){
+
+            removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount);
+
             addOrderToReady(currentOrder->el, ordersReady);
             removeOrderFromPending(currentOrder, prevOrder, ordersPending);
 
@@ -303,8 +306,11 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
         orderNode->el = item;
         orderNode->next = NULL;
 
-        if(removeIngredientsFromWarehouseByOrder(root, map, recipie, item->amount) == 1){
+        if(isOrderFulfillable(map, recipie, item->amount) == 1){
             //The order was processed immediately, adding to orders ready
+
+            removeIngredientsFromWarehouseByOrder(root, map, recipie, item->amount);
+
             if(ordersReady->head == NULL){
                 ordersReady->head = orderNode;
                 ordersReady->tail = orderNode;
