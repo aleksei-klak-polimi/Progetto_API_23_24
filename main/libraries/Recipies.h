@@ -8,19 +8,14 @@
 struct numberedItem{
     int                                 amount;
     struct numberedTimedItemListList    *ingredientHead;
-};
-
-
-struct numberedItemList{
-    struct numberedItem     *el;
-    struct numberedItemList *next;
+    struct numberedItem                 *next;
 };
 
 
 struct namedNumberedItemList{
     int                                 ordersPending;
     char                                *name;
-    struct numberedItemList             *head;
+    struct numberedItem                 *head;
     int                                 weight;
     struct namedNumberedItemList        *next;
 };
@@ -35,7 +30,6 @@ struct namedNumberedItemListListMap{
 
 
 typedef struct numberedItem                     ingredient;
-typedef struct numberedItemList                 ingredientList;
 typedef struct namedNumberedItemList            recipie;
 typedef struct namedNumberedItemListListMap     recipiesMap;
 

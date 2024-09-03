@@ -202,10 +202,10 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
 
         //Calcuate order weigth
         //todo store recipie weight in recipie struct
-        ingredientList *ingredientNode = recipie->head;
+        ingredient *ingredientNode = recipie->head;
         int weigth = 0;
         while(ingredientNode != NULL){
-            weigth += ingredientNode->el->amount;
+            weigth += ingredientNode->amount;
             ingredientNode = ingredientNode->next;
         }
         item->totalWeigth = weigth * item->amount;
@@ -272,11 +272,11 @@ void printRecipieBook(recipiesMap *book){
 void printRecipie(recipie *r){
     printf("\nRecipie name: %s\n", r->name);
 
-    ingredientList *ingr = r->head;
+    ingredient *ingr = r->head;
 
     int i = 0;
     while(ingr != 0){
-        printf("Ingredient %d: %s, %d\n", i, ingr->el->ingredientHead->ingredientName, ingr->el->amount);
+        printf("Ingredient %d: %s, %d\n", i, ingr->ingredientHead->ingredientName, ingr->amount);
         ingr = ingr->next;
         i++;
     }

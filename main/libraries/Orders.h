@@ -8,8 +8,8 @@
 
 struct numberedTimedLinkedItem{
     char        *name;
-    recipie     *recipie; //35 sec without
-    int         amount;
+    recipie     *recipie;
+    short int   amount;
     int         time;
     int         totalWeigth;
 };
@@ -50,7 +50,6 @@ typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
 
 int             readOrder(orderedItem *item, int time);
 void            printOrder(orderedItem *item);
-void            removeOrderFromIngredientMap(orderedItem *item, orderedItemQueueMap *ordersByIngredient, ingredientList *ingredientsHead);
 void            removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);
 void            fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);

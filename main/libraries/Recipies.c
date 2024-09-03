@@ -56,11 +56,9 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
 
 
 
-    ingredientList *head = NULL;
-    ingredientList *prev = NULL;
-    ingredientList *current = NULL;
-
     int totalWeigth = 0;
+    r->head = NULL;
+    ingredient *prev = NULL;
     
     //READ INGREDIENTS
     while(ch != '\n' && ch != EOF){
@@ -130,25 +128,22 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
         ingr->amount = atoi(amount);
         totalWeigth += ingr->amount;
 
+        ingr->next = NULL;
+
 
         //STORE INGREDIENT IN NODE
-        if(current != NULL){
-            prev = current;
+        if(r->head == NULL){
+            r->head = ingr;
+            prev = ingr;
         }
-        current = malloc(sizeof(*current));
-        current->el = ingr;
-        current->next = NULL;
-        //LINK PREV NODE TO NEW NODE
-        if(prev != NULL){
-            prev->next = current;
-        }
-        else if(head == NULL){
-            head = current;
+        else{
+            //todo try inserting ingredient from heaviest to lightest
+            prev->next = ingr;
+            prev = prev->next;
         }
     }
 
     //ADD LIST OF INGREDIENTS TO RECIPIE
-    r->head = head;
     r->weight = totalWeigth;
 
     //Insert recipie into map
@@ -230,8 +225,8 @@ int removeRecipie(recipiesMap *book){
         }
         else if(allowed == 1){
             //CLEARING MEMORY
-            ingredientList *ingredientCurr = currHashHead->head;
-            ingredientList *ingredientPrev = NULL;
+            ingredient *ingredientCurr = currHashHead->head;
+            ingredient *ingredientPrev = NULL;
 
             while(ingredientCurr != NULL){
                 //Clear all ingredients

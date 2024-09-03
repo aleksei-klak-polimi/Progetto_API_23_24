@@ -79,8 +79,8 @@ void removeIngredientsFromWarehouseByTime(warehouseTreeNode **root, warehouseMap
 }
 
 void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMap *map, recipie *recipie, int quantity){
-    ingredientList *firstIngredientNode = recipie->head;
-    ingredientList *currentIngredientNode = firstIngredientNode;
+    ingredient *firstIngredientNode = recipie->head;
+    ingredient *currentIngredientNode = firstIngredientNode;
 
     ingredientLotListList *hashHead;
 
@@ -91,9 +91,9 @@ void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMa
     ingredientLotList *prevIngredientHead = NULL;
 
     while(currentIngredientNode != NULL){
-        totalAmount = currentIngredientNode->el->amount * quantity;
+        totalAmount = currentIngredientNode->amount * quantity;
 
-        hashHead = currentIngredientNode->el->ingredientHead;
+        hashHead = currentIngredientNode->ingredientHead;
         //HashHead located
         ingredientHead = hashHead->el;
         prevIngredientHead = NULL;
@@ -134,13 +134,13 @@ int isOrderFulfillable(warehouseMap *map, recipie *recipie, int quantity){
     //Returns 1 if the ingredients were successfully removed
 
     //Check if there are enough ingredients for recipie
-    ingredientList *firstIngredientNode = recipie->head;
-    ingredientList *currentIngredientNode = firstIngredientNode;
+    ingredient *firstIngredientNode = recipie->head;
+    ingredient *currentIngredientNode = firstIngredientNode;
 
     //check for each ingredient if there are enough in storage
     while(currentIngredientNode != NULL){
 
-        if(currentIngredientNode->el->amount * quantity > currentIngredientNode->el->ingredientHead->totalAmount){
+        if(currentIngredientNode->amount * quantity > currentIngredientNode->ingredientHead->totalAmount){
             return 0;
         }
 
