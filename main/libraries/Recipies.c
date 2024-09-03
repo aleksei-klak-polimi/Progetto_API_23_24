@@ -134,12 +134,24 @@ int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedItemListMap *
         //STORE INGREDIENT IN NODE
         if(r->head == NULL){
             r->head = ingr;
-            prev = ingr;
+        }
+        else if(r->head->amount <= ingr->amount){
+            ingr->next = r->head;
+            r->head = ingr;
         }
         else{
-            //todo try inserting ingredient from heaviest to lightest
-            prev->next = ingr;
-            prev = prev->next;
+            prev = r->head;
+
+            while(prev != NULL){
+                if(prev->amount >= ingr->amount && (prev->next == NULL || prev->next->amount < ingr->amount)){
+                    ingr->next = prev->next;
+                    prev->next = ingr;
+
+                    break;
+                }
+
+                prev = prev->next;
+            }
         }
     }
 
