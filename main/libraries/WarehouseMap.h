@@ -6,11 +6,6 @@
 #include "TimedItems.h"
 #include "Map.h"
 
-struct numberedTimedItemListMap{
-    struct numberedTimedItemListList *hashArray[HASHMAPSIZE];
-};
-
-
 
 typedef struct numberedTimedItem                ingredientLot;
 typedef struct numberedTimedItemList            ingredientLotList;
