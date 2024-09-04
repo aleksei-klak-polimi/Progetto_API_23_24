@@ -138,3 +138,60 @@ void fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedIt
         }
     }
 }
+
+int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time){
+    int ch;
+
+    orderedItem *item = malloc(sizeof(*item));
+    ch = readOrder(item, time, book);
+
+    recipie *recipie = item->recipie;
+
+    if(recipie == NULL){
+        //No matching recipie was found, order refused and cleared from memory
+        printf("rifiutato\n");
+        free(item);
+    }
+    else{
+        //mark recipie as "orders relying on recipie"
+        recipie->ordersPending++;
+
+        //Calcuate order weigth
+        item->totalWeigth = recipie->weight * item->amount;
+        item->next = NULL;
+
+        //Handle the rest of the order procedures
+
+        if(isOrderFulfillable(recipie, item->amount) == 1){
+            //The order was processed immediately, adding to orders ready
+
+            removeIngredientsFromWarehouseByOrder(root, map, recipie, item->amount);
+
+            if(ordersReady->head == NULL){
+                ordersReady->head = item;
+                ordersReady->tail = item;
+            }
+            else{
+                ordersReady->tail->next = item;
+                ordersReady->tail = item;
+            }
+        }
+        else{
+            //The order could not be processed due to lacking ingredients, adding order to waiting queue and to ingredientMap
+            if(ordersWaiting->head == NULL){
+                ordersWaiting->head = item;
+            }
+            if(ordersWaiting->tail != NULL){
+                ordersWaiting->tail->next = item;
+            }
+            ordersWaiting->tail = item;
+
+
+            //addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
+        }
+
+        printf("accettato\n");
+    }
+
+    return ch;
+}

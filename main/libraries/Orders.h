@@ -7,11 +7,11 @@
 #include "Warehouse.h"
 
 struct numberedTimedLinkedItem{
-    recipie     *recipie;
-    short int   amount;
-    int         time;
-    int         totalWeigth;
-    struct numberedTimedLinkedItem *next;
+    struct namedNumberedItemList           *recipie;
+    short int                               amount;
+    int                                     time;
+    int                                     totalWeigth;
+    struct numberedTimedLinkedItem          *next;
 };
 
 
@@ -46,6 +46,7 @@ void            printOrder(orderedItem *item);
 void            removeOrderFromPending(orderedItem *current, orderedItem *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);
 void            fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
+int             order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, orderedItemQueue *ordersReady, orderedItemQueue *ordersWaiting, orderedItemQueueMap *ordersByIngredient, int time);
 
 
 #endif
