@@ -10,6 +10,6 @@ struct Courier{
 typedef struct Courier                          Courier;
 
 int             setupCourier(Courier *c);
-void            loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady);
+void            loadCourier(Courier *courier, orderedItemQueue *ordersReady);
 void            printCourierContents(Courier *courier);
 void            clearCourierOrdersMemory(Courier *courier);

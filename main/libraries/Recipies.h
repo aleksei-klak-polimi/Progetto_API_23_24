@@ -37,11 +37,8 @@ typedef struct namedNumberedItemListListMap     recipiesMap;
 
 
 //Parsing function
-int             readRecipie(recipiesMap *book, recipie *r, struct numberedTimedLotListMap *whMap);
-
-void            deleteRecipie(recipiesMap book, String name);
-void            decrementRecipieUtilization(recipiesMap *book, String name);
-void            incrementRecipieUtilization(recipiesMap *book, String name);
+int             readRecipie(recipiesMap *book, struct numberedTimedLotListMap *whMap);
+int             removeRecipie(recipiesMap *book);
 recipie         *retrieveRecipie(recipiesMap *book, String name);
 
 

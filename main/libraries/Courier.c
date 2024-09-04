@@ -20,7 +20,7 @@ int setupCourier(Courier *c){
     return ch;
 }
 
-void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersReady){
+void loadCourier(Courier *courier, orderedItemQueue *ordersReady){
     if(ordersReady->head != NULL){
         int currentCourierLoad = 0;
 

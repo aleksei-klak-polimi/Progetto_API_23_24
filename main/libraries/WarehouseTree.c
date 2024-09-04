@@ -233,54 +233,51 @@ void deleteNodeFromTree(warehouseTreeNode **root, warehouseTreeNode *node){
 }
 
 void rebalanceTreeAfterDelete(warehouseTreeNode **root, warehouseTreeNode *x){
-    // While x is not the root and x is black
     while (x != *root && x->isBlack == 1) {
-        if (x == x->parent->left) {                                         // x is the left child
-            warehouseTreeNode *w = x->parent->right;                        // w is x's sibling
-            if (w->isBlack == 0) {                                          // Case 1: x's sibling w is red
-                w->isBlack = 1;                                             // Recolor w as black
-                x->parent->isBlack = 0;                                     // Recolor x's parent as red
-                leftRotate(root, x->parent);                             // Left rotate on x's parent
-                w = x->parent->right;                                       // Update w to be the new sibling of x
+        if (x == x->parent->left) {
+            warehouseTreeNode *w = x->parent->right;
+            if (w->isBlack == 0) {
+                w->isBlack = 1;
+                x->parent->isBlack = 0;
+                leftRotate(root, x->parent);
+                w = x->parent->right;
             }
-            if (w->left->isBlack == 1 && w->right->isBlack == 1) {          // Case 2: Both of w's children are black
-                w->isBlack = 0;                                             // Recolor w as red
-                x = x->parent;                                              // Move x up the tree
+            if (w->left->isBlack == 1 && w->right->isBlack == 1) {
+                w->isBlack = 0;
+                x = x->parent;
             }
             else {
-                if (w->right->isBlack == 1) {                               // Case 3: w's right child is black
-                    w->left->isBlack = 1;                                   // Recolor w's left child as black
-                    w->isBlack = 0;                                         // Recolor w as red
-                    rightRotate(root, w);                                // Right rotate on w
-                    w = x->parent->right;                                   // Update w to be the new sibling of x
+                if (w->right->isBlack == 1) {
+                    w->left->isBlack = 1;
+                    w->isBlack = 0;
+                    rightRotate(root, w);
+                    w = x->parent->right;
                 }
-                                                                            // Case 4: w's right child is red
-                w->isBlack = x->parent->isBlack;                            // Make w the same color as x's parent
-                x->parent->isBlack = 1;                                     // Recolor x's parent as black
-                w->right->isBlack = 1;                                      // Recolor w's right child as black 
-                leftRotate(root, x->parent);                             // Left rotate on x's parent
-                x = *root;                                                  // Set x to root to end loop
+                w->isBlack = x->parent->isBlack;
+                x->parent->isBlack = 1;
+                w->right->isBlack = 1;
+                leftRotate(root, x->parent);
+                x = *root;
             }
-        } else {                                                            // Symmetric case: x is the right child
+        } else {
             warehouseTreeNode *w = x->parent->left;
-            if (w->isBlack == 0) {                                          // Case 1: x's sibling w is red
+            if (w->isBlack == 0) {
                 w->isBlack = 1;
                 x->parent->isBlack = 0;
                 rightRotate(root, x->parent);
                 w = x->parent->left;
             }
-            if (w->left->isBlack == 1 && w->right->isBlack == 1) {          // Case 2: Both of w's children are black
+            if (w->left->isBlack == 1 && w->right->isBlack == 1) {
                 w->isBlack = 0;
                 x = x->parent;
             }
             else {
-                if (w->left->isBlack == 1) {                                // Case 3: w's left child is black
+                if (w->left->isBlack == 1) {
                     w->right->isBlack = 1;
                     w->isBlack = 0;
                     leftRotate(root, w);
                     w = x->parent->left;
                 }
-                // Case 4: w's left child is red
                 w->isBlack = x->parent->isBlack;
                 x->parent->isBlack = 1;
                 w->left->isBlack = 1;
@@ -387,31 +384,4 @@ void treeTransplant(warehouseTreeNode **root, warehouseTreeNode *u, warehouseTre
         u->parent->right = v;
     }
     v->parent = u->parent;
-}
-
-
-
-
-
-// Recursive function to print the tree
-void printSpaces(int count) {
-    for (int i = 0; i < count; i++) {
-        printf("  ");
-    }
-}
-
-void printRBTree(warehouseTreeNode *node, int level) {
-    if (node == NULL || node == NIL) {
-        return;
-    }
-
-    // Print the right subtree first (higher values on the right)
-    printRBTree(node->right, level + 1);
-
-    // Print current node
-    printSpaces(level);  // Indent according to the current level
-    printf("%s[Expiration: %d]\n", node->isBlack ? "B" : "R", node->expiration);
-
-    // Print the left subtree
-    printRBTree(node->left, level + 1);
 }

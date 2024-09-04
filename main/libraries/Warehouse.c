@@ -127,7 +127,7 @@ void removeIngredientsFromWarehouseByOrder(warehouseTreeNode **root, warehouseMa
     }
 }
 
-int isOrderFulfillable(warehouseMap *map, recipie *recipie, int quantity){
+int isOrderFulfillable(recipie *recipie, int quantity){
     //Returns 0 if there were less ingredients available than specified amount and nothing is deleted
     //Returns 1 if the ingredients were successfully removed
 

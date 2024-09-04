@@ -4,7 +4,8 @@
 
 #include "Recipies.h"
 
-int readRecipie(recipiesMap *book, recipie *r, struct numberedTimedLotListMap *whMap){
+int readRecipie(recipiesMap *book, struct numberedTimedLotListMap *whMap){
+    recipie *r = malloc(sizeof(*r));
     int ch;
     int i = 0;
     char buffer[256];
@@ -279,34 +280,4 @@ recipie *retrieveRecipie(recipiesMap *book, String name){
     }
 
     return NULL;
-}
-
-void decrementRecipieUtilization(recipiesMap *book, String name){
-    int hash = sdbm_hash(name);
-    recipie *hashHead = book->hashArray[hash];
-
-    while(hashHead != NULL){
-        if(strcmp(hashHead->name, name) == 0){
-            hashHead->ordersPending--;
-            break;
-        }
-        else{
-            hashHead = hashHead->next;
-        }
-    }
-}
-
-void incrementRecipieUtilization(recipiesMap *book, String name){
-    int hash = sdbm_hash(name);
-    recipie *hashHead = book->hashArray[hash];
-
-    while(hashHead != NULL){
-        if(strcmp(hashHead->name, name) == 0){
-            hashHead->ordersPending++;
-            break;
-        }
-        else{
-            hashHead = hashHead->next;
-        }
-    }
 }

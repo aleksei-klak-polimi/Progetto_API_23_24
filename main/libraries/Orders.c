@@ -28,9 +28,6 @@ void removeOrderFromPending(orderedItem *current, orderedItem *prev, orderedItem
         //item is in the middle of the queue
         prev->next = current->next;
     }
-
-    //todo maybe instead of free, transplant directly into ready queue
-    //free(current);
 }
 
 void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
@@ -119,7 +116,7 @@ void fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedIt
     while(currentOrder != NULL){
         recipie = currentOrder->recipie;
 
-        if(isOrderFulfillable(map, recipie, currentOrder->amount) == 1){
+        if(isOrderFulfillable(recipie, currentOrder->amount) == 1){
 
             removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->amount);
 
