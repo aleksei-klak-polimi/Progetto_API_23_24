@@ -4,7 +4,7 @@
 struct Courier{
     int                                 frequency;
     int                                 capacity;
-    struct numberedTimedLinkedItemList  *ordersHead;
+    struct numberedTimedLinkedItem      *ordersHead;
 };
 
 typedef struct Courier                          Courier;

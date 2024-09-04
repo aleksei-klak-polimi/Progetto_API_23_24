@@ -11,19 +11,14 @@ struct numberedTimedLinkedItem{
     short int   amount;
     int         time;
     int         totalWeigth;
-};
-
-
-struct numberedTimedLinkedItemList{
-    struct numberedTimedLinkedItem      *el;
-    struct numberedTimedLinkedItemList  *next;
+    struct numberedTimedLinkedItem *next;
 };
 
 
 struct numberedTimedItemQueue{
     char                                    *ingredient;
-    struct numberedTimedLinkedItemList      *head;
-    struct numberedTimedLinkedItemList      *tail;
+    struct numberedTimedLinkedItem          *head;
+    struct numberedTimedLinkedItem          *tail;
 };
 
 
@@ -40,7 +35,6 @@ struct numberedTimedItemQueueMap{
 
 
 typedef struct numberedTimedLinkedItem          orderedItem;
-typedef struct numberedTimedLinkedItemList      orderedItemList;
 typedef struct numberedTimedItemQueue           orderedItemQueue;
 typedef struct numberedTimedItemQueueList       orderedItemQueueList;
 typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
@@ -49,7 +43,7 @@ typedef struct numberedTimedItemQueueMap        orderedItemQueueMap;
 
 int             readOrder(orderedItem *item, int time, recipiesMap *book);
 void            printOrder(orderedItem *item);
-void            removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting);
+void            removeOrderFromPending(orderedItem *current, orderedItem *prev, orderedItemQueue *ordersWaiting);
 void            addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady);
 void            fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady);
 

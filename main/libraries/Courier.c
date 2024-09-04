@@ -24,13 +24,13 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
     if(ordersReady->head != NULL){
         int currentCourierLoad = 0;
 
-        orderedItemList *orderNode;
+        orderedItem *orderNode;
 
         int breaker = 0;
         while(breaker == 0){
             orderNode = ordersReady->head;
             //Check if enough space in Courier
-            if(currentCourierLoad + orderNode->el->totalWeigth <= courier->capacity){
+            if(currentCourierLoad + orderNode->totalWeigth <= courier->capacity){
                 //order fits in the courier
                 //Load orders sorted by weight descending then by time ascending
 
@@ -38,13 +38,13 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
                 ordersReady->head = ordersReady->head->next;
 
                 //Increase courier load
-                currentCourierLoad += orderNode->el->totalWeigth;
+                currentCourierLoad += orderNode->totalWeigth;
 
                 //removing utilization from recipie book
-                orderNode->el->recipie->ordersPending--;
+                orderNode->recipie->ordersPending--;
 
                 //Load order inside courier
-                if(courier->ordersHead == NULL || courier->ordersHead->el->totalWeigth < orderNode->el->totalWeigth || (courier->ordersHead->el->totalWeigth == orderNode->el->totalWeigth && courier->ordersHead->el->time > orderNode->el->time)){
+                if(courier->ordersHead == NULL || courier->ordersHead->totalWeigth < orderNode->totalWeigth || (courier->ordersHead->totalWeigth == orderNode->totalWeigth && courier->ordersHead->time > orderNode->time)){
                     //if no orders are in courier OR first order weighs less than the current order OR they weigh the same but
                     //the current order is fresher then replace the head with the current order
                     orderNode->next = courier->ordersHead;
@@ -52,12 +52,12 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
                 }
                 else{
                     //Navigate through the list of orders in the courier to find correct placement
-                    orderedItemList *prev = NULL;
-                    orderedItemList *current = courier->ordersHead;
+                    orderedItem *prev = NULL;
+                    orderedItem *current = courier->ordersHead;
 
                     int breaker = 0;
                     while(breaker == 0){
-                        if(current->el->totalWeigth < orderNode->el->totalWeigth || (current->el->totalWeigth == orderNode->el->totalWeigth && current->el->time > orderNode->el->time)){
+                        if(current->totalWeigth < orderNode->totalWeigth || (current->totalWeigth == orderNode->totalWeigth && current->time > orderNode->time)){
                             breaker = 1;
                             orderNode->next = current;
 
@@ -91,14 +91,14 @@ void loadCourier(Courier *courier, recipiesMap *book, orderedItemQueue *ordersRe
 }
 
 void printCourierContents(Courier *courier){
-    orderedItemList *currentOrder = courier->ordersHead;
+    orderedItem *currentOrder = courier->ordersHead;
 
     if(courier->ordersHead == NULL){
         printf("camioncino vuoto\n");
     }
     else{
         while (currentOrder != NULL) {
-            printf("%d %s %d\n", currentOrder->el->time, currentOrder->el->recipie->name, currentOrder->el->amount);
+            printf("%d %s %d\n", currentOrder->time, currentOrder->recipie->name, currentOrder->amount);
             currentOrder = currentOrder->next;
         }
     }
@@ -109,14 +109,13 @@ void clearCourierOrdersMemory(Courier *courier){
         return;
     }
 
-    orderedItemList *current = courier->ordersHead;
-    orderedItemList *prev = NULL;
+    orderedItem *current = courier->ordersHead;
+    orderedItem *prev = NULL;
 
     while(current != NULL){
         prev = current;
         current = current->next;
-
-        free(prev->el);
+        
         free(prev);
     }
 

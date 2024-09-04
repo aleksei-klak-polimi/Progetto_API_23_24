@@ -201,18 +201,10 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
 
         //Calcuate order weigth
         //todo store recipie weight in recipie struct
-        ingredient *ingredientNode = recipie->head;
-        int weigth = 0;
-        while(ingredientNode != NULL){
-            weigth += ingredientNode->amount;
-            ingredientNode = ingredientNode->next;
-        }
-        item->totalWeigth = weigth * item->amount;
+        item->totalWeigth = recipie->weight * item->amount;
+        item->next = NULL;
 
         //Handle the rest of the order procedures
-        orderedItemList *orderNode = malloc(sizeof(*orderNode));
-        orderNode->el = item;
-        orderNode->next = NULL;
 
         if(isOrderFulfillable(map, recipie, item->amount) == 1){
             //The order was processed immediately, adding to orders ready
@@ -220,23 +212,23 @@ int order(warehouseMap *map, warehouseTreeNode **root, recipiesMap *book, ordere
             removeIngredientsFromWarehouseByOrder(root, map, recipie, item->amount);
 
             if(ordersReady->head == NULL){
-                ordersReady->head = orderNode;
-                ordersReady->tail = orderNode;
+                ordersReady->head = item;
+                ordersReady->tail = item;
             }
             else{
-                ordersReady->tail->next = orderNode;
-                ordersReady->tail = orderNode;
+                ordersReady->tail->next = item;
+                ordersReady->tail = item;
             }
         }
         else{
             //The order could not be processed due to lacking ingredients, adding order to waiting queue and to ingredientMap
             if(ordersWaiting->head == NULL){
-                ordersWaiting->head = orderNode;
+                ordersWaiting->head = item;
             }
             if(ordersWaiting->tail != NULL){
-                ordersWaiting->tail->next = orderNode;
+                ordersWaiting->tail->next = item;
             }
-            ordersWaiting->tail = orderNode;
+            ordersWaiting->tail = item;
 
 
             //addOrderToIngredientMap(item, ordersByIngredient, recipie->head);
@@ -305,18 +297,18 @@ void printOrderQueue(orderedItemQueue *queue){
     }
 
     printf("queue head:\n");
-    printOrder(queue->head->el);
+    printOrder(queue->head);
 
     printf("queue tail:\n");
-    printOrder(queue->tail->el);
+    printOrder(queue->tail);
 
-    orderedItemList *node = queue->head;
+    orderedItem *node = queue->head;
 
     printf("\nQueue in full:\n");
     int i = 0;
     while(node != NULL){
         printf("Item number %d\n", i);
-        printOrder(node->el);
+        printOrder(node);
         printf("\n");
         node = node->next;
 
@@ -345,7 +337,7 @@ void printOrdersByIngredientMap(orderedItemQueueMap *ordersByIngredient) {
                     if (hashHead->el->head == NULL) {
                         printf("0");
                     } else {
-                        orderedItemList *node = hashHead->el->head;
+                        orderedItem *node = hashHead->el->head;
 
                         int breaker = 0;
                         while (breaker == 0) {

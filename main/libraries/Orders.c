@@ -6,7 +6,7 @@
 #include "Orders.h"
 
 
-void removeOrderFromPending(orderedItemList *current, orderedItemList *prev, orderedItemQueue *ordersWaiting){
+void removeOrderFromPending(orderedItem *current, orderedItem *prev, orderedItemQueue *ordersWaiting){
     if(prev == NULL){
         //item to remove is the head of the queue
         if(current->next == NULL){
@@ -30,15 +30,14 @@ void removeOrderFromPending(orderedItemList *current, orderedItemList *prev, ord
     }
 
     //todo maybe instead of free, transplant directly into ready queue
-    free(current);
+    //free(current);
 }
 
 void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
-    orderedItemList *current = ordersReady->head;
-    orderedItemList *prev = NULL;
+    orderedItem *current = ordersReady->head;
+    orderedItem *prev = NULL;
 
-    orderedItemList *newNode = malloc(sizeof(*newNode));
-    newNode->el = item;
+    orderedItem *newNode = item;
 
     int breaker = 0;
     while(breaker == 0){
@@ -49,7 +48,7 @@ void addOrderToReady(orderedItem *item, orderedItemQueue *ordersReady){
 
             breaker = 1;
         }
-        else if(current->el->time <= item->time){
+        else if(current->time <= item->time){
             if(current->next != NULL){
                 prev = current;
                 current = current->next;
@@ -106,24 +105,27 @@ int readOrder(orderedItem *item, int time, recipiesMap *book){
 
         //ADD INGREDIENT TIME
         item->time = time;
+
+        item->next = NULL;
     }
     return ch;
 }
 
 void fulfillOrdersPending(warehouseMap *map, warehouseTreeNode **root, orderedItemQueue *ordersPending, orderedItemQueue *ordersReady){
-    orderedItemList *currentOrder = ordersPending->head;
-    orderedItemList *prevOrder = NULL;
+    orderedItem *currentOrder = ordersPending->head;
+    orderedItem *prevOrder = NULL;
     recipie *recipie = NULL;
 
     while(currentOrder != NULL){
-        recipie = currentOrder->el->recipie;
+        recipie = currentOrder->recipie;
 
-        if(isOrderFulfillable(map, recipie, currentOrder->el->amount) == 1){
+        if(isOrderFulfillable(map, recipie, currentOrder->amount) == 1){
 
-            removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->el->amount);
+            removeIngredientsFromWarehouseByOrder(root, map, recipie, currentOrder->amount);
 
-            addOrderToReady(currentOrder->el, ordersReady);
             removeOrderFromPending(currentOrder, prevOrder, ordersPending);
+            addOrderToReady(currentOrder, ordersReady);
+            
 
 
             if(prevOrder == NULL){
